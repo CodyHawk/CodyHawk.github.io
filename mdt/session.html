@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+//Start session<br/>
+session_start();<br/>
+//Check whether the session variable SESS_MEMBER_ID is present or not<br/>
+if (!isset($_SESSION[&#39;user_id&#39;]) || (trim($_SESSION[&#39;user_id&#39;]) == &#39;&#39;)) {<br/>
+    header(&#39;location:/mdt/index.php&#39;);<br/>
+    exit();<br/>
+}<br/>
+$session_id=$_SESSION[&#39;user_id&#39;];<br/>
+<br/>
+?&gt;</body></html>

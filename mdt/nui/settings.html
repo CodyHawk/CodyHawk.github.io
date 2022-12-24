@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+//MySQL Database<br/>
+$servername = &quot;localhost&quot;; //URL to MySQL server. If running locally use localhost<br/>
+$username = &quot;root&quot;; //Username used to login to server<br/>
+$password = &quot;CustomCad12&quot;; //Password used to login to server<br/>
+$dbname = &quot;mdt&quot;; //Name of the database with the provided SQL files<br/>
+<br/>
+$conn = mysqli_connect($servername, $username, $password, $dbname); //DON&#39;T TOUCH<br/>
+<br/>
+//Website Url<br/>
+$defaultURL = &quot;//localhost/mdt&quot;; //Url to where the MDT pages can be found. MUST INCLUDE &quot;//&quot; BEFORE URL ex: //test.com/mdt<br/>
+<br/>
+//Top bar title<br/>
+$topTitle = &quot;CAD&quot;;<br/>
+<br/>
+?&gt;</body></html>

@@ -1,0 +1,1321 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+include &quot;../include/top.php&quot;;<br/>
+<br/>
+//session_start();<br/>
+if (empty($_SESSION[&#39;user_loggedIn&#39;])) {<br/>
+    header(&quot;Location:$defaultURL&quot;);<br/>
+    die(&quot;You must login first&quot;);<br/>
+}<br/>
+include(&#39;../settings.php&#39;);<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;body bgcolor=&quot;#fff&quot;&gt;<br/>
+&lt;div style=&quot;display: none;&quot;&gt;&lt;?php include &quot;../utilities/api.php&quot;; ?&gt;&lt;/div&gt;<br/>
+&lt;title&gt;Law Enforcement&lt;/title&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;&lt;?php echo $defaultURL;?&gt;/modal.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:400,500&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+<br/>
+&lt;div class=&quot;department&quot;&gt;&lt;b&gt;Current Department:&lt;/b&gt; &lt;?php echo $_SESSION[&#39;departmentName&#39;] . &quot; &ndash; &quot; . $_SESSION[&#39;divisonName&#39;];?&gt;&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;sidebar&quot;&gt;<br/>
+&lt;button onclick=&quot;openScreen(&#39;#dashboard&#39;)&quot;&gt;Dashboard&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 75px;&quot; onclick=&quot;openScreen(&#39;#nameSearch&#39;)&quot;&gt;Name Search&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 150px;&quot; onclick=&quot;openScreen(&#39;#plateSearch&#39;)&quot;&gt;Plate Search&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 225px;&quot; onclick=&quot;openScreen(&#39;#citation&#39;)&quot;&gt;Citation&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 300px;&quot; onclick=&quot;openScreen(&#39;#warning&#39;)&quot;&gt;Written Warning&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 375px;&quot; onclick=&quot;openScreen(&#39;#arrest&#39;)&quot;&gt;Arrest Report&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 450px;&quot; onclick=&quot;penalOpen()&quot;&gt;Penal Code&lt;/button&gt;<br/>
+&lt;button id=&quot;signal&quot; style=&quot;margin&ndash;top: 525px; cursor: default !important;&quot; disabled&gt;Signal 100&lt;/button&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;statusbar&quot;&gt;<br/>
+    &lt;button id=&quot;10&ndash;6&quot;&gt;10&ndash;6&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;7&quot;&gt;10&ndash;7&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;8&quot;&gt;10&ndash;8&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;15&quot;&gt;10&ndash;15&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;23&quot;&gt;10&ndash;23&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;97&quot;&gt;10&ndash;97&lt;/button&gt;<br/>
+    &lt;button id=&quot;10&ndash;42&quot;&gt;10&ndash;42&lt;/button&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;dashboard&quot; style=&quot;display: block !important;&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1 id=&quot;noCallAlert&quot;&gt;No Call Assigned&lt;/h1&gt;<br/>
+    &lt;div id=&quot;call&quot;&gt;<br/>
+        &lt;h1 id=&quot;call_name&quot;&gt;&lt;/h1&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;h2 id=&quot;call_info&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;div id=&quot;call_details&quot;&gt;&lt;/div&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;nameSearch&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Name Search&lt;/h1&gt;<br/>
+    &lt;div id=&quot;nameInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;first&quot; placeholder=&quot;First&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;last&quot; placeholder=&quot;Last&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;search&quot;&gt;Search&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;alert&gt;No Results&lt;/alert&gt;<br/>
+    <br/>
+    &lt;div id=&quot;searchResults&quot;&gt;<br/>
+    &lt;h2 id=&quot;name&quot;&gt;&lt;/h2&gt;<br/>
+    &lt;h2 id=&quot;dob&quot;&gt;&lt;/h2&gt;<br/>
+    &lt;h2 id=&quot;gender&quot;&gt;&lt;/h2&gt;<br/>
+    &lt;h2 id=&quot;address&quot;&gt;&lt;/h2&gt;<br/>
+    &lt;h1&gt;Licenses&lt;/h1&gt;<br/>
+    &lt;table style=&quot;margin&ndash;left: 40px; width: 30%;&quot;&gt;<br/>
+        &lt;tr&gt;<br/>
+            &lt;th&gt;Type&lt;/th&gt;<br/>
+            &lt;th&gt;Status&lt;/th&gt;<br/>
+        &lt;/tr&gt;<br/>
+        &lt;tr&gt;<br/>
+            &lt;td&gt;Driver&lt;/td&gt;<br/>
+            &lt;td id=&quot;lic&quot;&gt;&lt;/td&gt;<br/>
+        &lt;/tr&gt;<br/>
+        &lt;tr&gt;<br/>
+            &lt;td&gt;Weapon&lt;/td&gt;<br/>
+            &lt;td id=&quot;weapon&quot;&gt;&lt;/td&gt;<br/>
+        &lt;/tr&gt;<br/>
+    &lt;/table&gt;<br/>
+    <br/>
+    &lt;h1&gt;Vehicles&lt;/h1&gt;<br/>
+    &lt;table id=&quot;vehicles&quot; style=&quot;margin&ndash;left: 40px; width: 30%;&quot;&gt;&lt;/table&gt;<br/>
+    <br/>
+    &lt;h1&gt;Records&lt;/h1&gt;<br/>
+    &lt;select id=&quot;nameReportSelect&quot; onchange=&quot;nameReport(this.value)&quot;&gt;<br/>
+        &lt;option value=&quot;tickets&quot;&gt;Tickets&lt;/option&gt;<br/>
+        &lt;option value=&quot;warnings&quot;&gt;Warnings&lt;/option&gt;<br/>
+        &lt;option value=&quot;arrests&quot;&gt;Arrests&lt;/option&gt;<br/>
+    &lt;/select&gt;<br/>
+    &lt;table id=&quot;nameReportTable&quot;&gt;<br/>
+    &lt;/table&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;plateSearch&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Plate Search&lt;/h1&gt;<br/>
+    &lt;div id=&quot;plateInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Plate&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; placeholder=&quot;Plate&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;search&quot;&gt;Search&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;alert&gt;No Results&lt;/alert&gt;<br/>
+<br/>
+    &lt;div id=&quot;searchResults&quot;&gt;<br/>
+        &lt;h2 id=&quot;plate&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;model&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;owner&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;description&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;reg&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;insurance&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;flags&quot;&gt;&lt;/h2&gt;<br/>
+    <br/>
+    &lt;h1&gt;Records&lt;/h1&gt;<br/>
+    &lt;select id=&quot;plateReportSelect&quot; onchange=&quot;plateReport(this.value)&quot;&gt;<br/>
+        &lt;option value=&quot;tickets&quot;&gt;Tickets&lt;/option&gt;<br/>
+        &lt;option value=&quot;warnings&quot;&gt;Warnings&lt;/option&gt;<br/>
+        &lt;option value=&quot;arrests&quot;&gt;Arrests&lt;/option&gt;<br/>
+    &lt;/select&gt;<br/>
+    &lt;table id=&quot;plateReportTable&quot;&gt;<br/>
+    &lt;/table&gt;<br/>
+        <br/>
+    &lt;/div&gt;     <br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;citation&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Citation&lt;/h1&gt;<br/>
+    &lt;alert&gt;&lt;/alert&gt;<br/>
+    &lt;!&ndash;&ndash;Name Search&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;citationInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;first&quot; placeholder=&quot;First&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;last&quot; placeholder=&quot;Last&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchName&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    <br/>
+    &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;citationInput&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Plate&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; plateId=&quot;0&quot; placeholder=&quot;Plate&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchPlate&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+    <br/>
+    &lt;!&ndash;&ndash;Vehicle Description&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;citationInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Vehicle Description&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;description&quot; placeholder=&quot;Description&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+    <br/>
+    &lt;!&ndash;&ndash;List&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;citationList&quot;&gt;<br/>
+        &lt;table id=&quot;citationListTable&quot;&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Name&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th colspan=&quot;2&quot;&gt;Punishment&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &lt;/table&gt;<br/>
+        &lt;button style=&quot;margin&ndash;top: 5px;&quot; onclick=&quot;citationOpen()&quot;&gt;Add&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+    &lt;div id=&quot;citationInput&quot; style=&quot;margin&ndash;top: 20px;&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Location&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Location&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;location&quot; placeholder=&quot;Location&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;!&ndash;&ndash;Fine&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;citationInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Total Fine&lt;/label&gt;<br/>
+            &lt;input type=&quot;number&quot; id=&quot;fine&quot; placeholder=&quot;Fine&quot; value=&quot;0&quot; min=&quot;0&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+    <br/>
+    &lt;div id=&quot;citationInput&quot; style=&quot;margin&ndash;bottom: 50px;&quot;&gt;<br/>
+    &lt;button id=&quot;submit&quot;&gt;Submit&lt;/button&gt;<br/>
+    &lt;/DIV&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;arrest&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Arrest Report&lt;/h1&gt;<br/>
+    &lt;alert&gt;&lt;/alert&gt;<br/>
+    &lt;!&ndash;&ndash;Name Search&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;first&quot; placeholder=&quot;First&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;last&quot; placeholder=&quot;Last&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchName&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+<br/>
+    &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestInput&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Plate&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; plateId=&quot;0&quot; placeholder=&quot;Plate&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchPlate&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;!&ndash;&ndash;Vehicle Description&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Vehicle Description&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;description&quot; placeholder=&quot;Description&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+<br/>
+    &lt;!&ndash;&ndash;List&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestList&quot;&gt;<br/>
+        &lt;table id=&quot;arrestListTable&quot;&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Name&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th colspan=&quot;2&quot;&gt;Punishment&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &lt;/table&gt;<br/>
+        &lt;button style=&quot;margin&ndash;top: 5px;&quot; onclick=&quot;arrestOpen()&quot;&gt;Add&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+    &lt;div id=&quot;arrestInput&quot; style=&quot;margin&ndash;top: 20px;&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Location&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Location&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;location&quot; placeholder=&quot;Location&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;!&ndash;&ndash;Fine&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Total Fine&lt;/label&gt;<br/>
+            &lt;input type=&quot;number&quot; id=&quot;fine&quot; placeholder=&quot;Fine&quot; value=&quot;0&quot; min=&quot;0&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+    <br/>
+    &lt;!&ndash;&ndash;Jail Time&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;arrestInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Jail Time&lt;/label&gt;<br/>
+            &lt;input type=&quot;number&quot; id=&quot;jail&quot; placeholder=&quot;Time&quot; value=&quot;0&quot; min=&quot;0&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;div id=&quot;arrestInput&quot; style=&quot;margin&ndash;bottom: 50px;&quot;&gt;<br/>
+        &lt;button id=&quot;submit&quot;&gt;Submit&lt;/button&gt;<br/>
+    &lt;/DIV&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;warning&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Warning&lt;/h1&gt;<br/>
+    &lt;alert&gt;&lt;/alert&gt;<br/>
+    &lt;!&ndash;&ndash;Name Search&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;warningInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;first&quot; placeholder=&quot;First&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;last&quot; placeholder=&quot;Last&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchName&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+<br/>
+    &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;warningInput&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Plate Search&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Plate&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; plateId=&quot;0&quot; placeholder=&quot;Plate&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;searchPlate&quot;&gt;Search&lt;/button&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;!&ndash;&ndash;Vehicle Description&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;warningInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Vehicle Description&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;description&quot; placeholder=&quot;Description&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+<br/>
+    &lt;!&ndash;&ndash;List&ndash;&ndash;&gt;<br/>
+    &lt;div id=&quot;warningList&quot;&gt;<br/>
+        &lt;table id=&quot;warningListTable&quot;&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Name&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th colspan=&quot;2&quot;&gt;Punishment&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &lt;/table&gt;<br/>
+        &lt;button style=&quot;margin&ndash;top: 5px;&quot; onclick=&quot;warningOpen()&quot;&gt;Add&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+    &lt;div id=&quot;warningInput&quot; style=&quot;margin&ndash;top: 20px;&quot;&gt;<br/>
+        &lt;!&ndash;&ndash;Location&ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Location&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;location&quot; placeholder=&quot;Location&quot; style=&quot;width: 275%;&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;br&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;br&gt;<br/>
+<br/>
+    &lt;div id=&quot;warningInput&quot; style=&quot;margin&ndash;bottom: 50px;&quot;&gt;<br/>
+        &lt;button id=&quot;submit&quot;&gt;Submit&lt;/button&gt;<br/>
+    &lt;/DIV&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;penalModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+            <br/>
+            &lt;table id=&quot;penalTable&quot; style=&quot;&quot;&gt;<br/>
+                &lt;?php <br/>
+                    $query = &quot;SELECT id, name FROM mdt_penal_category&quot;;<br/>
+<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        echo &quot;&lt;tr class=&#39;header expand&#39; id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&lt;th colspan=&#39;3&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+                }}<br/>
+                    ?&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+            <br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+<br/>
+&lt;div id=&quot;citationModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+            <br/>
+            &lt;table id=&quot;citationTable&quot; style=&quot;&quot;&gt;<br/>
+                &lt;?php <br/>
+                    $query = &quot;SELECT id, name FROM mdt_penal_category&quot;;<br/>
+<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        echo &quot;&lt;tr class=&#39;header expand&#39; id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&lt;th colspan=&#39;3&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+                }}<br/>
+                    ?&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+            <br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;warningModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+            <br/>
+            &lt;table id=&quot;warningTable&quot; style=&quot;&quot;&gt;<br/>
+                &lt;?php <br/>
+                    $query = &quot;SELECT id, name FROM mdt_penal_category&quot;;<br/>
+<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        echo &quot;&lt;tr class=&#39;header expand&#39; id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&lt;th colspan=&#39;3&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+                }}<br/>
+                    ?&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+            <br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;arrestModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+<br/>
+            &lt;table id=&quot;arrestTable&quot; style=&quot;&quot;&gt;<br/>
+                &lt;?php<br/>
+                $query = &quot;SELECT id, name FROM mdt_penal_category&quot;;<br/>
+<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        echo &quot;&lt;tr class=&#39;header expand&#39; id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&lt;th colspan=&#39;3&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+                    }<br/>
+                }<br/>
+                ?&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+<br/>
+&lt;div id=&quot;nameModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+<br/>
+            &lt;table id=&quot;civTable&quot; style=&quot;&quot;&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;script&gt; <br/>
+    getSignal();<br/>
+    var sound = 0;<br/>
+    var signal = new Audio(&quot;&lt;?php echo $defaultURL; ?&gt;/audio/signal.mp3&quot;);<br/>
+    function getSignal() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getSignal&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        if (response === &#39;1&#39;) {<br/>
+            $(&#39;#sidebar #signal&#39;).attr(&#39;class&#39;,&#39;active&#39;);<br/>
+            sound = 1 + sound;<br/>
+        } else {<br/>
+            $(&#39;#sidebar #signal&#39;).attr(&#39;class&#39;,&#39;&#39;);<br/>
+            sound = 0;<br/>
+        }<br/>
+    });<br/>
+    <br/>
+    if (sound === 1) {<br/>
+        signal.play();<br/>
+    }<br/>
+    setTimeout(getSignal, 2000);<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+$(&quot;#arrest #submit&quot;).click(function(){<br/>
+  <br/>
+  var characterId = $(&quot;#arrest input#first&quot;).attr(&#39;characterid&#39;);<br/>
+  var plateId = $(&quot;#arrest input#plate&quot;).attr(&#39;plateid&#39;);<br/>
+  var first = $(&quot;#arrest input#first&quot;).val();<br/>
+  var last = $(&quot;#arrest input#last&quot;).val();<br/>
+  var plate = $(&quot;#arrest input#plate&quot;).val();<br/>
+  var description = $(&quot;#arrest input#description&quot;).val();<br/>
+  var location = $(&quot;#arrest input#location&quot;).val();<br/>
+  var fine = $(&quot;#arrest input#fine&quot;).val();<br/>
+  var jail = $(&quot;#arrest input#jail&quot;).val();<br/>
+  <br/>
+  var infraction = [];<br/>
+  <br/>
+$(&quot;#arrestListTable tr&quot;).each(function(){<br/>
+    infraction.push($(this).find(&quot;td:first&quot;).text()); //put elements into array<br/>
+});<br/>
+    infraction.shift();//fixes weird extra element bug thing<br/>
+    console.log(plateId);<br/>
+<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;submitArrest&#39;,<br/>
+      characterId: characterId,<br/>
+      first: first,<br/>
+      last: last,<br/>
+      plateId: plateId,<br/>
+      plate: plate,<br/>
+      description: description,<br/>
+      infraction: infraction,<br/>
+      location: location,<br/>
+      fine: fine,<br/>
+      jail: jail<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#arrest alert&quot;).html(response);<br/>
+        if (response === &quot;&quot;) {<br/>
+            clearArrest();<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#arrest #searchPlate&quot;).click(function(){<br/>
+    var plate = $(&quot;#arrest input#plate&quot;).val();<br/>
+<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;doesPlateExistArrest&#39;,<br/>
+      plate: plate<br/>
+    },<br/>
+    function(response){<br/>
+        //console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        if (response[0] === &quot;single&quot;){<br/>
+        $(&quot;#arrest input#description&quot;).val(response[1]);<br/>
+    } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+    }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#arrest #searchName&quot;).click(function(){<br/>
+    var first = $(&quot;#arrest input#first&quot;).val();<br/>
+    var last = $(&quot;#arrest input#last&quot;).val();<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchNameArrest&#39;,<br/>
+      first: first,<br/>
+      last: last<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;single&quot;){<br/>
+            $(&quot;#arrest input#first&quot;).attr(&#39;characterid&#39;,response[1]);<br/>
+        } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+        }<br/>
+    });<br/>
+});<br/>
+<br/>
+function searchNameArrest(id) {<br/>
+    $(&quot;#arrest input#first&quot;).attr(&#39;characterid&#39;,id);<br/>
+    closeModal();<br/>
+}<br/>
+function searchPlateArrest(id,description) {<br/>
+    $(&quot;#arrest input#plate&quot;).attr(&#39;plateid&#39;,id);<br/>
+    $(&quot;#arrest input#description&quot;).val(description);<br/>
+    closeModal();<br/>
+}<br/>
+<br/>
+function clearArrest() {<br/>
+    $(&quot;#arrest input&quot;).val(&#39;&#39;);<br/>
+    $(&#39;#arrestListTable tr&#39;).not(&#39;:first&#39;).remove();<br/>
+    $(&quot;#arrest input#fine&quot;).val(&#39;0&#39;);<br/>
+    $(&quot;#arrest input#jail&quot;).val(&#39;0&#39;);<br/>
+}<br/>
+<br/>
+    function arrestAdd(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalFromId&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        $(response[0]).insertAfter(&quot;#arrestListTable tr:last&quot;);<br/>
+        closeModal();<br/>
+        var fine = parseInt($(&quot;#arrest #fine&quot;).val()) + parseInt(response[1]);<br/>
+        console.log(document.getElementById(&quot;fine&quot;).value);<br/>
+        $(&quot;#arrest #fine&quot;).val(fine);<br/>
+        var jail = parseInt($(&quot;#arrest #jail&quot;).val()) + parseInt(response[2]);<br/>
+        $(&quot;#arrest #jail&quot;).val(jail)<br/>
+    });<br/>
+    }<br/>
+    <br/>
+$(&#39;#arrestTable .header&#39;).click(function(){<br/>
+     if ($(this).nextUntil(&#39;#arrestTable tr.header&#39;).length === 0) {<br/>
+     var id = $(this)[0].id;<br/>
+     <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalArrests&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(response).insertAfter(&quot;#arrestTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#arrestTable tr&#39;).not(&#39;#arrestTable tr.header&#39;).remove();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+$(&quot;#warning #submit&quot;).click(function(){<br/>
+  <br/>
+  var characterId = $(&quot;#warning input#first&quot;).attr(&#39;characterid&#39;);<br/>
+  var plateId = $(&quot;#warning input#plate&quot;).attr(&#39;plateid&#39;);<br/>
+  var first = $(&quot;#warning input#first&quot;).val();<br/>
+  var last = $(&quot;#warning input#last&quot;).val();<br/>
+  var plate = $(&quot;#warning input#plate&quot;).val();<br/>
+  var description = $(&quot;#warning input#description&quot;).val();<br/>
+  var location = $(&quot;#warning input#location&quot;).val();<br/>
+  <br/>
+  var infraction = [];<br/>
+  <br/>
+$(&quot;#warningListTable tr&quot;).each(function(){<br/>
+    infraction.push($(this).find(&quot;td:first&quot;).text()); //put elements into array<br/>
+});<br/>
+    infraction.shift();//fixes weird extra element bug thing<br/>
+    console.log(infraction);<br/>
+<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;submitWarning&#39;,<br/>
+      characterId: characterId,<br/>
+      first: first,<br/>
+      last: last,<br/>
+      plateId: plateId,<br/>
+      plate: plate,<br/>
+      description: description,<br/>
+      infraction: infraction,<br/>
+      location: location<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#warning alert&quot;).html(response);<br/>
+        if (response === &quot;&quot;) {<br/>
+            clearWarning();<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#warning #searchPlate&quot;).click(function(){<br/>
+    var plate = $(&quot;#warning input#plate&quot;).val();<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;doesPlateExistWarning&#39;,<br/>
+      plate: plate<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        if (response[0] === &quot;single&quot;){<br/>
+        $(&quot;#warning input#description&quot;).val(response[1]);<br/>
+    } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+    }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#warning #searchName&quot;).click(function(){<br/>
+    var first = $(&quot;#warning input#first&quot;).val();<br/>
+    var last = $(&quot;#warning input#last&quot;).val();<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchNameWarning&#39;,<br/>
+      first: first,<br/>
+      last: last<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;single&quot;){<br/>
+            $(&quot;#warning input#first&quot;).attr(&#39;characterid&#39;,response[1]);<br/>
+        } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+        }<br/>
+    });<br/>
+});<br/>
+<br/>
+function searchNameWarning(id) {<br/>
+    $(&quot;#warning input#first&quot;).attr(&#39;characterid&#39;,id);<br/>
+    closeModal();<br/>
+}<br/>
+function searchPlateWarning(id,description) {<br/>
+    $(&quot;#warning input#plate&quot;).attr(&#39;plateid&#39;,id);<br/>
+    $(&quot;#warning input#description&quot;).val(description);<br/>
+    closeModal();<br/>
+}<br/>
+<br/>
+function clearWarning() {<br/>
+    $(&quot;#warning input&quot;).val(&#39;&#39;);<br/>
+    $(&#39;#warningListTable tr&#39;).not(&#39;:first&#39;).remove();<br/>
+}<br/>
+<br/>
+    function warningAdd(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalFromId&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        $(response[0]).insertAfter(&quot;#warningListTable tr:last&quot;);<br/>
+        closeModal();<br/>
+    });<br/>
+    }<br/>
+    <br/>
+$(&#39;#warningTable .header&#39;).click(function(){<br/>
+     if ($(this).nextUntil(&#39;#warningTable tr.header&#39;).length === 0) {<br/>
+     var id = $(this)[0].id;<br/>
+     <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalWarnings&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(response).insertAfter(&quot;#warningTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#warningTable tr&#39;).not(&#39;#warningTable tr.header&#39;).remove();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+$(&quot;#citation #submit&quot;).click(function(){<br/>
+  <br/>
+  var characterId = $(&quot;#citation input#first&quot;).attr(&#39;characterid&#39;);<br/>
+  var plateId = $(&quot;#citation input#plate&quot;).attr(&#39;plateid&#39;);<br/>
+  var first = $(&quot;#citation input#first&quot;).val();<br/>
+  var last = $(&quot;#citation input#last&quot;).val();<br/>
+  var plate = $(&quot;#citation input#plate&quot;).val();<br/>
+  var description = $(&quot;#citation input#description&quot;).val();<br/>
+  var location = $(&quot;#citation input#location&quot;).val();<br/>
+  var fine = $(&quot;#citation input#fine&quot;).val();<br/>
+  <br/>
+  var infraction = [];<br/>
+  <br/>
+$(&quot;#citationListTable tr&quot;).each(function(){<br/>
+    infraction.push($(this).find(&quot;td:first&quot;).text()); //put elements into array<br/>
+});<br/>
+    infraction.shift();//fixes weird extra element bug thing<br/>
+    console.log(infraction);<br/>
+<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;submitCitation&#39;,<br/>
+      characterId: characterId,<br/>
+      first: first,<br/>
+      last: last,<br/>
+      plateId: plateId,<br/>
+      plate: plate,<br/>
+      description: description,<br/>
+      infraction: infraction,<br/>
+      location: location,<br/>
+      fine: fine<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#citation alert&quot;).html(response);<br/>
+        if (response === &quot;&quot;) {<br/>
+            clearTicket();<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#citation #searchPlate&quot;).click(function(){<br/>
+    var plate = $(&quot;#citation input#plate&quot;).val();<br/>
+<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;doesPlateExist&#39;,<br/>
+      plate: plate<br/>
+    },<br/>
+    function(response){<br/>
+        //console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        if (response[0] === &quot;single&quot;){<br/>
+        $(&quot;#citation input#description&quot;).val(response[1]);<br/>
+    } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+    }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+$(&quot;#citation #searchName&quot;).click(function(){<br/>
+    var first = $(&quot;#citation input#first&quot;).val();<br/>
+    var last = $(&quot;#citation input#last&quot;).val();<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchNameCitation&#39;,<br/>
+      first: first,<br/>
+      last: last<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;single&quot;){<br/>
+            $(&quot;#citation input#first&quot;).attr(&#39;characterid&#39;,response[1]);<br/>
+        } else {<br/>
+            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+            nameOpen();<br/>
+        }<br/>
+    });<br/>
+});<br/>
+<br/>
+function searchNameCitation(id) {<br/>
+    $(&quot;#citation input#first&quot;).attr(&#39;characterid&#39;,id);<br/>
+    closeModal();<br/>
+}<br/>
+function searchPlateCitation(id,description) {<br/>
+    $(&quot;#citation input#plate&quot;).attr(&#39;plateid&#39;,id);<br/>
+    $(&quot;#citation input#description&quot;).val(description);<br/>
+    closeModal();<br/>
+}<br/>
+<br/>
+function clearTicket() {<br/>
+    $(&quot;#citation input&quot;).val(&#39;&#39;);<br/>
+    $(&#39;#citationListTable tr&#39;).not(&#39;:first&#39;).remove();<br/>
+    $(&quot;#citation input#fine&quot;).val(&#39;0&#39;);<br/>
+}<br/>
+<br/>
+    function citationAdd(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalFromId&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        $(response[0]).insertAfter(&quot;#citationListTable tr:last&quot;);<br/>
+        closeModal();<br/>
+        var fine = parseInt($(&quot;#citation #fine&quot;).val()) + parseInt(response[1]);<br/>
+        console.log(document.getElementById(&quot;fine&quot;).value);<br/>
+        $(&quot;#citation #fine&quot;).val(fine)<br/>
+    });<br/>
+    }<br/>
+    <br/>
+$(&#39;#citationTable .header&#39;).click(function(){<br/>
+     if ($(this).nextUntil(&#39;#citationTable tr.header&#39;).length === 0) {<br/>
+     var id = $(this)[0].id;<br/>
+     <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenalCitations&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(response).insertAfter(&quot;#citationTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#citationTable tr&#39;).not(&#39;#citationTable tr.header&#39;).remove();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+<br/>
+<br/>
+&lt;script&gt;<br/>
+$(&#39;#penalModal .header&#39;).click(function(){<br/>
+     if ($(this).nextUntil(&#39;#penalModal tr.header&#39;).length === 0) {<br/>
+     var id = $(this)[0].id;<br/>
+     <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenal&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(response).insertAfter(&quot;#penalModal #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#penalModal tr&#39;).not(&#39;#penalModal tr.header&#39;).remove();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    /*<br/>
+var coll = document.getElementsByClassName(&quot;collapsible&quot;);<br/>
+var i;<br/>
+<br/>
+for (i = 0; i &lt; coll.length; i++) {<br/>
+  coll[i].addEventListener(&quot;click&quot;, function() {<br/>
+    this.classList.toggle(&quot;active&quot;);<br/>
+    var content = this.nextElementSibling;<br/>
+    if (content.style.maxHeight){<br/>
+      content.style.maxHeight = null;<br/>
+    } else {<br/>
+      content.style.maxHeight = content.scrollHeight + &quot;px&quot;;<br/>
+    } <br/>
+  });<br/>
+}<br/>
+*/<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    function openScreen(open) {<br/>
+        $(&quot;.screen&quot;).hide();<br/>
+        $(open).show();<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+$(&quot;#statusbar button&quot;).click(function(){<br/>
+  $(&quot;#statusbar button&quot;).attr(&#39;class&#39;, &#39;&#39;);<br/>
+  $(this).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+  var status = $(this).html();<br/>
+  console.log(status);<br/>
+    <br/>
+    if (status === &quot;10&ndash;8&quot;) {<br/>
+        $(&quot;#call&quot;).hide();<br/>
+    }<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;submitStatus&#39;,<br/>
+      status: status<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+    });<br/>
+    <br/>
+});<br/>
+function getStatus() {<br/>
+$.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+{<br/>
+  function: &#39;getStatus&#39;<br/>
+},<br/>
+function(response){<br/>
+    $(&quot;#statusbar button&quot;).attr(&#39;class&#39;, &#39;&#39;);<br/>
+    $(&quot;#statusbar button#&quot; + response).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+});<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    getCall();<br/>
+  var newCall = 0;<br/>
+function getCall() {<br/>
+var newCallSound = new Audio(&quot;&lt;?php echo $defaultURL; ?&gt;/audio/newCall.mp3&quot;);<br/>
+$.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+{<br/>
+  function: &#39;getCall&#39;<br/>
+},<br/>
+function(response){<br/>
+  //console.log(response);<br/>
+  <br/>
+  if (response !== &#39;none&#39;) {<br/>
+      $(&quot;#call&quot;).show();<br/>
+      $(&quot;#noCallAlert&quot;).hide();<br/>
+      newCall = newCall + 1;<br/>
+      <br/>
+    response = JSON.parse(response);<br/>
+    document.getElementById(&quot;call_name&quot;).innerHTML = &quot;Call Details &ndash; &quot; + response[1];<br/>
+    document.getElementById(&quot;call_info&quot;).innerHTML = &quot;CALL &quot; + response[0] + &quot; &ndash; &quot; + response[2];<br/>
+    document.getElementById(&quot;call_details&quot;).innerHTML = response[3];<br/>
+      <br/>
+      <br/>
+  } else {<br/>
+      $(&quot;#call&quot;).hide();<br/>
+      $(&quot;#noCallAlert&quot;).show();<br/>
+      newCall = 0;<br/>
+  }<br/>
+  <br/>
+  if (newCall === 1) {<br/>
+      console.log(&#39;New Call&#39;);<br/>
+    newCallSound.play();<br/>
+  } <br/>
+  <br/>
+});<br/>
+getStatus();<br/>
+setTimeout(getCall, 5000);<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    var plateSearchId;<br/>
+$(&quot;#plateSearch #search&quot;).click(function(){<br/>
+  $(this).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+  var plate = $(&quot;input#plate&quot;).val();<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchPlate&#39;,<br/>
+      plate: plate<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;No Results&quot;) {<br/>
+              $(&quot;#plateSearch alert&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).hide();<br/>
+        } else {<br/>
+              if (response[0] === &quot;multiple&quot;) {<br/>
+              $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Plate&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+              nameOpen();<br/>
+          } else {<br/>
+              $(&quot;#plateSearch alert&quot;).hide();<br/>
+              //$(&quot;#nameInput&quot;).hide();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults #plate&quot;).html(&quot;Plate: &quot; + response[1]);<br/>
+              $(&quot;#plateSearch #searchResults #model&quot;).html(&quot;Model: &quot; + response[2]);<br/>
+              $(&quot;#plateSearch #searchResults #owner&quot;).html(&quot;Owner: &quot; + response[3]);<br/>
+              $(&quot;#plateSearch #searchResults #description&quot;).html(&quot;Description: &quot; + response[4]);<br/>
+              $(&quot;#plateSearch #searchResults #reg&quot;).html(&quot;Registration: &quot; + response[5]);<br/>
+              $(&quot;#plateSearch #searchResults #insurance&quot;).html(&quot;Insurance: &quot; + response[6]);<br/>
+              $(&quot;#plateSearch #searchResults #flags&quot;).html(&quot;Flags: &quot; + response[7]);<br/>
+              $(&quot;#plateSearch input#plate&quot;).attr(&#39;plateid&#39;,response[8]);<br/>
+              plateReport();<br/>
+              }<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+function plateReport() {<br/>
+    var plate = $(&quot;#plateSearch #plate&quot;).attr(&#39;plateid&#39;);<br/>
+    var type = $(&quot;#plateSearch #plateReportSelect option:selected&quot; ).val();<br/>
+    console.log(type);<br/>
+    //var plate = $(&quot;#plateSearch input#plate&quot;).val();<br/>
+    console.log(plate);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;plateReport&#39;,<br/>
+      plate: plate,<br/>
+      type: type<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#plateSearch #searchResults #plateReportTable&quot;).html(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+function plateReportDetailed(id) {<br/>
+    var type = $(&quot;#plateSearch #plateReportSelect option:selected&quot; ).val();<br/>
+     if ($(&#39;#&#39; + id).nextUntil(&#39;#plateReportTable tr.header&#39;).length === 0) {<br/>
+     console.log(id);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;plateReportDetailed&#39;,<br/>
+      type: type,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(response).insertAfter(&quot;#plateReportTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#plateReportTable tr&#39;).not(&#39;#plateReportTable tr.header&#39;).remove();<br/>
+}<br/>
+<br/>
+<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function searchPlateMultiple(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchPlateMultiple&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+              $(&quot;#plateSearch alert&quot;).hide();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults #plate&quot;).html(&quot;Plate: &quot; + response[1]);<br/>
+              $(&quot;#plateSearch #searchResults #model&quot;).html(&quot;Model: &quot; + response[2]);<br/>
+              $(&quot;#plateSearch #searchResults #owner&quot;).html(&quot;Owner: &quot; + response[3]);<br/>
+              $(&quot;#plateSearch #searchResults #description&quot;).html(&quot;Description: &quot; + response[4]);<br/>
+              $(&quot;#plateSearch #searchResults #reg&quot;).html(&quot;Registration: &quot; + response[5]);<br/>
+              $(&quot;#plateSearch #searchResults #insurance&quot;).html(&quot;Insurance: &quot; + response[6]);<br/>
+              document.getElementById(&#39;nameModal&#39;).style.display = &#39;none&#39;;<br/>
+              $(&quot;#plateSearch #searchResults #flags&quot;).html(&quot;Flags: &quot; + response[7]);<br/>
+              $(&quot;#plateSearch input#plate&quot;).attr(&#39;plateid&#39;,response[8]);<br/>
+              plateReport();<br/>
+    });<br/>
+} <br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+$(&quot;#nameSearch #search&quot;).click(function(){<br/>
+  $(this).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+  var first = $(&quot;input#first&quot;).val();<br/>
+  var last = $(&quot;input#last&quot;).val();<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchName&#39;,<br/>
+      first: first,<br/>
+      last: last<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;No Results&quot;) {<br/>
+              $(&quot;#nameSearch alert&quot;).show();<br/>
+              $(&quot;#nameSearch #searchResults&quot;).hide();<br/>
+        } else {<br/>
+              if (response[0] === &quot;multiple&quot;) {<br/>
+              $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+              nameOpen();<br/>
+          } else {<br/>
+              $(&quot;#nameSearch alert&quot;).hide();<br/>
+              //$(&quot;#nameInput&quot;).hide();<br/>
+              $(&quot;#nameSearch #searchResults&quot;).show();<br/>
+              $(&quot;#nameSearch #searchResults #name&quot;).html(&quot;Name: &quot; + response[1] + &quot; &quot; +response[2]);<br/>
+              $(&quot;#nameSearch #searchResults #dob&quot;).html(&quot;DOB: &quot; + response[3]);<br/>
+              $(&quot;#nameSearch #searchResults #gender&quot;).html(&quot;Gender: &quot; + response[4]);<br/>
+              $(&quot;#nameSearch #searchResults #address&quot;).html(&quot;Address: &quot; + response[5]);<br/>
+              $(&quot;#nameSearch #searchResults #lic&quot;).html(response[6]);<br/>
+              $(&quot;#nameSearch #searchResults #weapon&quot;).html(response[7]);<br/>
+              getSearchedNameVehicles(response[8]);<br/>
+              $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;,response[8]);<br/>
+              nameReport();<br/>
+              }<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+function nameReport() {<br/>
+    var name = $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;);<br/>
+    var type = $(&quot;#nameSearch #nameReportSelect option:selected&quot; ).val();<br/>
+    console.log(type);<br/>
+    //var plate = $(&quot;#plateSearch input#plate&quot;).val();<br/>
+    console.log(plate);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;nameReport&#39;,<br/>
+      name: name,<br/>
+      type: type<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#nameSearch #searchResults #nameReportTable&quot;).html(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+function nameReportDetailed(id) {<br/>
+    var type = $(&quot;#nameSearch #nameReportSelect option:selected&quot; ).val();<br/>
+     if ($(&#39;#&#39; + id).nextUntil(&#39;#nameReportTable tr.header&#39;).length === 0) {<br/>
+     console.log(&#39;yo&#39;);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;nameReportDetailed&#39;,<br/>
+      type: type,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(response).insertAfter(&quot;#nameReportTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#nameReportTable tr&#39;).not(&#39;#nameReportTable tr.header&#39;).remove();<br/>
+}<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function searchNameMultiple(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchNameMultiple&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+              $(&quot;#nameSearch alert&quot;).hide();<br/>
+              //$(&quot;#nameInput&quot;).hide();<br/>
+              $(&quot;#nameSearch #searchResults&quot;).show();<br/>
+              $(&quot;#nameSearch #searchResults #name&quot;).html(&quot;Name: &quot; + response[1] + &quot; &quot; +response[2]);<br/>
+              $(&quot;#nameSearch #searchResults #dob&quot;).html(&quot;DOB: &quot; + response[3]);<br/>
+              $(&quot;#nameSearch #searchResults #gender&quot;).html(&quot;Gender: &quot; + response[4]);<br/>
+              $(&quot;#nameSearch #searchResults #address&quot;).html(&quot;Address: &quot; + response[5]);<br/>
+              $(&quot;#nameSearch #searchResults #lic&quot;).html(response[6]);<br/>
+              $(&quot;#nameSearch #searchResults #weapon&quot;).html(response[7]);<br/>
+              getSearchedNameVehicles(response[8]);<br/>
+              $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;,response[8]);<br/>
+              nameReport();<br/>
+              document.getElementById(&#39;nameModal&#39;).style.display = &#39;none&#39;;<br/>
+    });<br/>
+} <br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    function getSearchedNameVehicles(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getSearchedNameVehicles&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#nameSearch #searchResults #vehicles&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Plate&lt;/th&gt;&lt;th&gt;Model&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;&quot; + response);<br/>
+    });<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+function nameOpen() {<br/>
+    document.getElementById(&#39;nameModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+<br/>
+function penalOpen() {<br/>
+    document.getElementById(&#39;penalModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function citationOpen() {<br/>
+    document.getElementById(&#39;citationModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function warningOpen() {<br/>
+    document.getElementById(&#39;warningModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function arrestOpen() {<br/>
+    document.getElementById(&#39;arrestModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function closeModal() {<br/>
+  $(&quot;.modal&quot;).hide();<br/>
+}<br/>
+<br/>
+window.onclick = function(event) {<br/>
+  if ($(event.target).hasClass(&quot;modal&quot;)) {<br/>
+    $(&quot;.modal&quot;).hide();<br/>
+  }};<br/>
+&lt;/script&gt;</body></html>

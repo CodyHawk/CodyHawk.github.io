@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+<br/>
+//Including Database configuration file.<br/>
+ <br/>
+include &quot;dbcon.php&quot;;<br/>
+ <br/>
+//Getting value of &quot;search&quot; variable from &quot;script.js&quot;.<br/>
+ <br/>
+if (isset($_POST[&#39;name&#39;])) {<br/>
+ <br/>
+//Search box value assigning to $Name variable.<br/>
+ <br/>
+   $Name = $_POST[&#39;name&#39;];<br/>
+   $serverId = $_POST[&#39;serverId&#39;];<br/>
+ <br/>
+//Search query.<br/>
+ <br/>
+   $Query = &quot;SELECT * FROM server WHERE aop=&#39;$Name&#39; AND id=&#39;$serverId&#39;&quot;;<br/>
+ <br/>
+//Query execution<br/>
+ <br/>
+   $ExecQuery = MySQLi_query($con, $Query);<br/>
+ <br/>
+//Creating unordered list to display result.<br/>
+   echo &#39;&#39;;<br/>
+   //Fetching result from database.<br/>
+ <br/>
+   while ($Result = MySQLi_fetch_array($ExecQuery)) {<br/>
+$aop = $Result[&#39;aop&#39;];<br/>
+       if ($Result[&#39;aop&#39;] === $Name) {<br/>
+echo &quot;selected, $aop&quot;;<br/>
+       }<br/>
+}}</body></html>

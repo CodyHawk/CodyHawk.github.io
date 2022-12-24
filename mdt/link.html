@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php include(&#39;settings.php&#39;); <br/>
+session_start();<br/>
+?&gt;<br/>
+&lt;!DOCTYPE html&gt;<br/>
+&lt;html&gt;<br/>
+    &lt;head&gt;<br/>
+        &lt;meta charset=&quot;UTF&ndash;8&quot;&gt;<br/>
+        &lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:700&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+        &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+        &lt;script src=&quot;link.js&quot;&gt;&lt;/script&gt;<br/>
+        &lt;style&gt; <br/>
+            BT {<br/>
+                font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+                color: black;<br/>
+                font&ndash;size: 5em;<br/>
+                text&ndash;align: center;<br/>
+            }<br/>
+            l {<br/>
+                font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+                font&ndash;size: 2em;<br/>
+                color: black;<br/>
+                text&ndash;align: center;<br/>
+                position: relative;<br/>
+            }<br/>
+            #codeInput {<br/>
+                font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+                font&ndash;size: 100px;<br/>
+                text&ndash;align: center;<br/>
+                color: black;<br/>
+                width: 500px;<br/>
+            }<br/>
+            #Success {<br/>
+                position: initial;<br/>
+                float: top;<br/>
+                top: 0px;<br/>
+            }<br/>
+            #image {<br/>
+                height: 250px;<br/>
+                width: 250px;<br/>
+                margin: 75px;<br/>
+                border: 5px solid black;<br/>
+            }<br/>
+            p {<br/>
+                margin&ndash;top: 50px<br/>
+            }<br/>
+        &lt;/style&gt; <br/>
+    &lt;/head&gt;<br/>
+    &lt;body&gt;<br/>
+        &lt;div id=&quot;Success&quot; hidden&gt;<br/>
+            &lt;center&gt;<br/>
+                &lt;BT&gt;Welcome, &lt;/BT&gt;<br/>
+                &lt;BT id=&quot;name&quot;&gt;&lt;/BT&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;img id=&quot;image&quot; src=&quot;&quot;&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;p&gt;&lt;l&gt;Your account has been successfully linked!&lt;/l&gt;&lt;/p&gt;<br/>
+                &lt;p&gt;&lt;l&gt;You may now continue to FiveM&lt;/l&gt;&lt;/p&gt;<br/>
+            &lt;/center&gt;<br/>
+        &lt;/div&gt;<br/>
+        <br/>
+        <br/>
+&lt;div id=&quot;code&quot; &gt;<br/>
+    &lt;Center&gt;<br/>
+        &lt;BT&gt;Please follow the instructions below&lt;/BT&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;p style=&quot;margin&ndash;top: 100px&quot;&gt;&lt;l&gt;1. Enter &quot;/link&quot; into the FiveM Chat &lt;/l&gt;&lt;/p&gt;<br/>
+        &lt;p&gt;&lt;l&gt;2. Enter the code on the screen into the box below&lt;/l&gt;&lt;/p&gt;<br/>
+    &lt;form&gt;<br/>
+        &lt;input id=&quot;codeInput&quot; required type=&quot;text&quot; maxlength=&quot;4&quot;&gt;<br/>
+    &lt;/form&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+    &lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php session_start();<br/>
+?&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;&lt;?php echo $defaultURL;?&gt;/include/top.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;&lt;?php echo $defaultURL;?&gt;/modal.css&quot;&gt;<br/>
+&lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:400,500&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;script src=&quot;&lt;?php echo $defaultURL;?&gt;/utilities/console.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;div id=&quot;top&quot;&gt;<br/>
+    <br/>
+    &lt;div class=&quot;server&quot;&gt;&lt;?php echo $topTitle;?&gt; &ndash; Server &lt;?php echo $_SESSION[&#39;user_server&#39;];?&gt;&lt;/div&gt;<br/>
+    <br/>
+    &lt;div id=&quot;clock&quot;&gt;&lt;/div&gt;<br/>
+    <br/>
+    &lt;div id=&quot;userName&quot;&gt;&lt;?php if (empty($_SESSION[&#39;user_identifier&#39;])) {echo $_SESSION[&#39;user_name&#39;];}else{echo &quot;&lt;a href=&#39;javascript:identifierOpen();&#39;&gt;&quot; . $_SESSION[&#39;user_name&#39;] . &quot; &ndash; &quot; . $_SESSION[&#39;user_identifier&#39;] . &quot;&lt;/a&gt;&quot;;}?&gt;&lt;/div&gt;<br/>
+    <br/>
+    &lt;div id=&quot;aop&quot;&gt;&lt;/div&gt;<br/>
+    <br/>
+    &lt;div id=&quot;logout&quot;&gt;<br/>
+        &lt;a href=&quot;../dashboard.php&quot; &gt;&lt;img src=&quot;../img/home.png&quot; style=&quot;position: relative&quot; height=&quot;30&quot; width=&quot;30&quot;&gt;&lt;/a&gt;<br/>
+        &lt;a href=&quot;../utilities/logout.php&quot; &gt;&lt;img src=&quot;../img/logout.png&quot; style=&quot;position: relative&quot; height=&quot;30&quot; width=&quot;30&quot;&gt;&lt;/a&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;aopModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+        &lt;span class=&quot;close&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+        &lt;h1&gt;Please Select an Area of Patrol&lt;/h1&gt;<br/>
+        &lt;select id=&#39;aopSelect&#39;&gt;<br/>
+                        &lt;?php<br/>
+$query = &quot;SELECT name FROM mdt_aop_names&quot;;<br/>
+$result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+    // output data of each row<br/>
+    while($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo &quot;&lt;option value=&#39;&quot; . $row[&#39;name&#39;] . &quot;&#39;&gt;&quot; . $row[&quot;name&quot;] . &quot;&lt;/option&gt;&quot;;<br/>
+    }<br/>
+} else {<br/>
+    echo &quot;&lt;option&gt;No Results&lt;/option&gt;&quot;;<br/>
+}<br/>
+$conn&ndash;&gt;close();<br/>
+            ?&gt;<br/>
+        &lt;/select&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button onclick=&#39;submitAOP();&#39;&gt;Submit&lt;/button&gt;<br/>
+        &lt;p&gt;Takes up to 5 seconds to update&lt;/p&gt;<br/>
+<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;identifierModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;a href=&quot;../dashboard.php&quot;&gt;&lt;span class=&quot;close&quot;&gt;&amp;times;&lt;/span&gt;&lt;/a&gt;<br/>
+            &lt;h1&gt;Please Enter an Identifier&lt;/h1&gt;<br/>
+            &lt;form method=&quot;post&quot; action=&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;&gt;<br/>
+                &lt;input type=&quot;text&quot; id=&quot;identifier&quot; name=&quot;identifier&quot; required&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;submit&quot; id=&quot;submit&quot; name=&quot;submitIdentifier&quot;&gt;<br/>
+            &lt;/form&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+<br/>
+            &lt;script&gt;<br/>
+    function currentTime() {<br/>
+  var date = new Date(); /* creating object of Date class */<br/>
+  var hour = date.getHours();<br/>
+  var min = date.getMinutes();<br/>
+  var sec = date.getSeconds();<br/>
+  hour = updateTime(hour);<br/>
+  min = updateTime(min);<br/>
+  sec = updateTime(sec);<br/>
+  document.getElementById(&quot;clock&quot;).innerText = hour + &quot; : &quot; + min + &quot; : &quot; + sec; /* adding time to the div */<br/>
+    var t = setTimeout(function(){ currentTime() }, 1000); /* setting timer */<br/>
+    <br/>
+}<br/>
+<br/>
+function updateTime(k) {<br/>
+  if (k &lt; 10) {<br/>
+    return &quot;0&quot; + k;<br/>
+  }<br/>
+  else {<br/>
+    return k;<br/>
+  }<br/>
+}<br/>
+currentTime(); /* calling currentTime() function to initiate the process */<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+        getAOP();<br/>
+function getAOP() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getAOP&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        if (response === &#39;logout&#39;) {<br/>
+            window.location.replace(&quot;&lt;?php echo $defaultURL ?&gt;&quot;);<br/>
+        }<br/>
+      //console.log(response);<br/>
+      document.getElementById(&quot;aop&quot;).innerHTML = response;<br/>
+    });<br/>
+    setTimeout(getAOP, 5000);<br/>
+        }<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+function submitAOP() {<br/>
+    var selected = document.getElementById(&quot;aopSelect&quot;).options[aopSelect.selectedIndex].value;<br/>
+    <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;submitAOP&#39;,<br/>
+      aop: selected<br/>
+    },<br/>
+    function(response){<br/>
+        aop.style.display = &quot;none&quot;;<br/>
+        if (response === &quot;not today&quot;) {<br/>
+            window.location.replace(&quot;https://www.youtube.com/watch?v=dQw4w9WgXcQ&quot;);<br/>
+        }<br/>
+    });<br/>
+}<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+// Get the modal<br/>
+var aop = document.getElementById(&#39;aopModal&#39;);<br/>
+<br/>
+// Get the button that opens the modal<br/>
+var btn = document.getElementById(&quot;myBtn&quot;);<br/>
+<br/>
+// Get the &lt;span&gt; element that closes the modal<br/>
+var span = document.getElementsByClassName(&quot;close&quot;)[0];<br/>
+<br/>
+function aopOpen() {<br/>
+    aop.style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+// When the user clicks on &lt;span&gt; (x), close the modal<br/>
+span.onclick = function() {<br/>
+aop.style.display = &quot;none&quot;;<br/>
+}<br/>
+<br/>
+// When the user clicks anywhere outside of the modal, close it<br/>
+window.onclick = function(event) {<br/>
+if (event.target == aop) {<br/>
+aop.style.display = &quot;none&quot;;<br/>
+}<br/>
+}<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+// Get the modal<br/>
+var identifier = document.getElementById(&#39;identifierModal&#39;);<br/>
+<br/>
+if (&lt;?php if (empty($_SESSION[&#39;user_identifier&#39;])) {echo &#39;true&#39;;}else{echo &#39;false&#39;;}?&gt;) {<br/>
+identifierOpen();<br/>
+}<br/>
+<br/>
+function identifierOpen() {<br/>
+    identifier.style.display = &#39;block&#39;;<br/>
+}<br/>
+&lt;/script&gt;</body></html>

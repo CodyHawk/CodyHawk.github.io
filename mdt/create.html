@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php include(&#39;settings.php&#39;); <br/>
+session_start();<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;head&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;modal.css&quot;&gt;<br/>
+&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;title&gt;Create Account&lt;/title&gt;<br/>
+&lt;/head&gt;<br/>
+&lt;body&gt;<br/>
+    &lt;div id=&quot;linkModal&quot; class=&quot;modal&quot;&gt;<br/>
+        &lt;center&gt;<br/>
+      &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+<br/>
+        <br/>
+  &lt;/div&gt;<br/>
+        &lt;/center&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;div class=&quot;form&ndash;wrapper&quot; style=&#39;height:525px; top: 45%;&#39;&gt;<br/>
+  &lt;form id=&quot;form&quot; method=&quot;post&quot; action=&quot;utilities/create.php&quot;&gt;<br/>
+    &lt;h3&gt;Create Account&lt;/h3&gt;<br/>
+    <br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&lt;input type=&quot;text&quot; name=&quot;name&quot; placeholder=&quot;Name&quot; autofocus required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input type=&quot;text&quot; name=&quot;email&quot; placeholder=&quot;Email&quot; autofocus required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input type=&quot;password&quot; name=&quot;pass&quot; placeholder=&quot;Password&quot; required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input type=&quot;password&quot; name=&quot;pass2&quot; placeholder=&quot;Confirm Password&quot; required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div class=&quot;form&ndash;item&quot; style=&#39;display: &lt;?php if ($enableCode == true) {echo &quot;block&quot;;} else {echo &quot;none&quot;;}?&gt;&#39;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input style=&#39;background: none;&#39; type=&quot;text&quot; name=&quot;code&quot; placeholder=&quot;Account Code&quot; &lt;?php if ($enableCode == true) {echo &quot;required&quot;;}?&gt;&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;button&ndash;panel&quot;&gt;<br/>
+        &lt;input type=&quot;submit&quot; class=&quot;button&quot; id=&quot;sub&quot; title=&quot;Log In&quot; name=&quot;login&quot; value=&quot;Login&quot;&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;center&gt;&lt;alert&gt;&lt;?php  if(isset($_SESSION[&#39;loginError&#39;])) {echo $_SESSION[&#39;loginError&#39;]; unset($_SESSION[&#39;loginError&#39;]);}?&gt;&lt;/alert&gt;&lt;/center&gt;<br/>
+    &lt;center&gt;&lt;a href=&#39;index.php&#39;&gt;&lt;h2&gt;Login&lt;/h2&gt;&lt;/a&gt;&lt;/center&gt;<br/>
+  &lt;/form&gt;<br/>
+    &lt;script&gt;<br/>
+        $(document).ready(function () {<br/>
+            window.addEventListener(&#39;message&#39;, function (event) {<br/>
+                var item = event.data;<br/>
+                if (item.jo) {<br/>
+                    alert(&#39;jo&#39;);<br/>
+                    console.log(&#39;mama&#39;);<br/>
+                }<br/>
+                });<br/>
+        });<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+/*<br/>
+    // Get the modal<br/>
+var link = document.getElementById(&#39;linkModal&#39;);<br/>
+<br/>
+// Get the button that opens the modal<br/>
+var btn = document.getElementById(&quot;myBtn&quot;);<br/>
+<br/>
+// Get the &lt;span&gt; element that closes the modal<br/>
+var span = document.getElementsByClassName(&quot;close&quot;)[0];<br/>
+<br/>
+//get url<br/>
+<br/>
+var url_string = window.location.href;<br/>
+var url = new URL(url_string);<br/>
+var linkUrl = url.searchParams.get(&quot;link&quot;);<br/>
+var id = url.searchParams.get(&quot;id&quot;);<br/>
+<br/>
+//When #link open modal<br/>
+if (linkUrl === &quot;1&quot;) {<br/>
+link.style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+// When the user clicks on &lt;span&gt; (x), close the modal<br/>
+span.onclick = function() {<br/>
+  link.style.display = &quot;none&quot;;<br/>
+}<br/>
+<br/>
+// When the user clicks anywhere outside of the modal, close it<br/>
+window.onclick = function(event) {<br/>
+  if (event.target == link) {<br/>
+    link.style.display = &quot;none&quot;;<br/>
+  }<br/>
+}<br/>
+*/<br/>
+    &lt;/script&gt;<br/>
+&lt;/div&gt;<br/>
+&lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

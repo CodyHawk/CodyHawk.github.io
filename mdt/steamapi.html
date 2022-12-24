@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;?php<br/>
+include(&#39;settings.php&#39;);<br/>
+function steamAvatar($SteamID) {<br/>
+        //$SteamID = &quot;76561198164179083&quot;;<br/>
+&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;$Name = &quot;Player Name&quot;;<br/>
+&nbsp;&nbsp;&nbsp;$Avatar  = &#39;img/noavatar.jpg&#39;;<br/>
+&nbsp;&nbsp;&nbsp;/*<br/>
+&nbsp;&nbsp;&nbsp;if (isset($_GET[&#39;steamid&#39;])) <br/>
+&nbsp;&nbsp;&nbsp;{<br/>
+            */<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SteamAPI = &#39;http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=&#39; . $SteamAPI_KEY . &#39;&amp;steamids=&#39; . $SteamID;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SteamAPI_Returned = file_get_contents($SteamAPI);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$steamAPI = json_decode($SteamAPI_Returned, true);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (isset($steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;personaname&#39;]))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$Name = $steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;personaname&#39;];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (isset($steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;avatarfull&#39;]))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$Avatar = $steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;avatarfull&#39;];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+                <br/>
+                return $Avatar;<br/>
+}<br/>
+&nbsp;&nbsp;&nbsp;//}<br/>
+<br/>
+$string = &quot;11000010c27788b&quot;; // == 245 in base 10  <br/>
+<br/>
+echo base_convert($string, 16, 10);  <br/>
+<br/>
+?&gt;</body></html>

@@ -1,0 +1,752 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+include &quot;../include/top.php&quot;;<br/>
+<br/>
+$_SESSION[&#39;departmentName&#39;] = &#39;Dispatch&#39;;<br/>
+$_SESSION[&#39;divisonName&#39;] = &#39;&#39;;<br/>
+<br/>
+//session_start();<br/>
+if (empty($_SESSION[&#39;user_loggedIn&#39;])) {<br/>
+    header(&quot;Location:$defaultURL&quot;);<br/>
+    die(&quot;You must login first&quot;);<br/>
+}<br/>
+include(&#39;../settings.php&#39;);<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;body bgcolor=&quot;#fff&quot;&gt;<br/>
+&lt;div style=&quot;display: none;&quot;&gt;&lt;?php include &quot;../utilities/api.php&quot;; ?&gt;&lt;/div&gt;<br/>
+&lt;title&gt;Dispatch&lt;/title&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;&lt;?php echo $defaultURL;?&gt;/modal.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:400,500&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+<br/>
+&lt;div id=&quot;sidebar&quot;&gt;<br/>
+&lt;button onclick=&quot;openScreen(&#39;#dashboard&#39;)&quot;&gt;Dashboard&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 75px;&quot; onclick=&quot;openScreen(&#39;#nameSearch&#39;)&quot;&gt;Name Search&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 150px;&quot; onclick=&quot;openScreen(&#39;#plateSearch&#39;)&quot;&gt;Plate Search&lt;/button&gt;<br/>
+&lt;button style=&quot;margin&ndash;top: 225px;&quot; onclick=&quot;penalOpen()&quot;&gt;Penal Code&lt;/button&gt;<br/>
+&lt;button id=&quot;signal&quot; style=&quot;margin&ndash;top: 300px;&quot; onclick=&quot;signal()&quot;&gt;Signal 100&lt;/button&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;call&quot;&gt;<br/>
+        &lt;h1&gt;Create Call&lt;/h1&gt;<br/>
+        &lt;p&gt;&lt;alert&gt;&lt;/alert&gt;&lt;/p&gt;<br/>
+        &lt;div id=&quot;callInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+        &lt;label&gt;Call Type&lt;/label&gt;<br/>
+        &lt;select id=&quot;type&quot;&gt;<br/>
+            &lt;option disabled hidden selected value=&#39;Call Type&#39;&gt;Call Type&lt;/option&gt;<br/>
+            &lt;?php <br/>
+            $query = &quot;SELECT id, name FROM mdt_call_type&quot;;<br/>
+<br/>
+            $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+            if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                // output data of each row<br/>
+                while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                    echo &quot;&lt;option&gt;&quot;  . $row[&#39;name&#39;] . &quot;&lt;/option&gt;&quot;;<br/>
+                }<br/>
+            }<br/>
+            ?&gt;<br/>
+        &lt;/select&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Location&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;location&quot; placeholder=&quot;Location&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Postal Code&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;postal&quot; placeholder=&quot;Postal&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Description&lt;/label&gt;<br/>
+            &lt;textarea id=&#39;description&#39; style=&#39;resize:vertical&#39;&gt;&lt;/textarea&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;button id=&quot;create&quot;&gt;Create&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;dashboard&quot; style=&quot;display: block !important;&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;div id=&quot;openCall&quot;&gt;<br/>
+        &lt;h3&gt;Open Calls&lt;/h3&gt;<br/>
+        &lt;table id=&quot;openCallTable&quot;&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Call #&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th colspan=&quot;2&quot;&gt;Location&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &lt;/table&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    <br/>
+    &lt;div id=&quot;units&quot;&gt;<br/>
+        &lt;h3&gt;Units&lt;/h3&gt;<br/>
+        &lt;table id=&quot;unitTable&quot;&gt;<br/>
+        &lt;/table&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;nameSearch&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Name Search&lt;/h1&gt;<br/>
+    &lt;div id=&quot;nameInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;first&quot; placeholder=&quot;First&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;last&quot; placeholder=&quot;Last&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;search&quot;&gt;Search&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;alert&gt;No Results&lt;/alert&gt;<br/>
+<br/>
+    &lt;div id=&quot;searchResults&quot;&gt;<br/>
+        &lt;h2 id=&quot;name&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;dob&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;gender&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;address&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h1&gt;Licenses&lt;/h1&gt;<br/>
+        &lt;table style=&quot;margin&ndash;left: 40px; width: 30%;&quot;&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th&gt;Status&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;td&gt;Driver&lt;/td&gt;<br/>
+                &lt;td id=&quot;lic&quot;&gt;&lt;/td&gt;<br/>
+            &lt;/tr&gt;<br/>
+            &lt;tr&gt;<br/>
+                &lt;td&gt;Weapon&lt;/td&gt;<br/>
+                &lt;td id=&quot;weapon&quot;&gt;&lt;/td&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &lt;/table&gt;<br/>
+<br/>
+        &lt;h1&gt;Vehicles&lt;/h1&gt;<br/>
+        &lt;table id=&quot;vehicles&quot; style=&quot;margin&ndash;left: 40px; width: 30%;&quot;&gt;&lt;/table&gt;<br/>
+<br/>
+        &lt;h1&gt;Records&lt;/h1&gt;<br/>
+        &lt;select id=&quot;nameReportSelect&quot; onchange=&quot;nameReport(this.value)&quot;&gt;<br/>
+            &lt;option value=&quot;tickets&quot;&gt;Tickets&lt;/option&gt;<br/>
+            &lt;option value=&quot;warnings&quot;&gt;Warnings&lt;/option&gt;<br/>
+            &lt;option value=&quot;arrests&quot;&gt;Arrests&lt;/option&gt;<br/>
+        &lt;/select&gt;<br/>
+        &lt;table id=&quot;nameReportTable&quot;&gt;<br/>
+        &lt;/table&gt;<br/>
+    &lt;/div&gt;<br/>
+<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;plateSearch&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1&gt;Plate Search&lt;/h1&gt;<br/>
+    &lt;div id=&quot;plateInput&quot;&gt;<br/>
+        &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+            &lt;label&gt;Plate&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; placeholder=&quot;Plate&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;br&gt;<br/>
+        &lt;button id=&quot;search&quot;&gt;Search&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;alert&gt;No Results&lt;/alert&gt;<br/>
+<br/>
+    &lt;div id=&quot;searchResults&quot;&gt;<br/>
+        &lt;h2 id=&quot;plate&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;model&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;owner&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;description&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;reg&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;insurance&quot;&gt;&lt;/h2&gt;<br/>
+        &lt;h2 id=&quot;flags&quot;&gt;&lt;/h2&gt;<br/>
+<br/>
+        &lt;h1&gt;Records&lt;/h1&gt;<br/>
+        &lt;select id=&quot;plateReportSelect&quot; onchange=&quot;plateReport(this.value)&quot;&gt;<br/>
+            &lt;option value=&quot;tickets&quot;&gt;Tickets&lt;/option&gt;<br/>
+            &lt;option value=&quot;warnings&quot;&gt;Warnings&lt;/option&gt;<br/>
+            &lt;option value=&quot;arrests&quot;&gt;Arrests&lt;/option&gt;<br/>
+        &lt;/select&gt;<br/>
+        &lt;table id=&quot;plateReportTable&quot;&gt;<br/>
+        &lt;/table&gt;<br/>
+<br/>
+    &lt;/div&gt;     <br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;nameModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+<br/>
+            &lt;table id=&quot;civTable&quot; style=&quot;&quot;&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;penalModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;span class=&quot;close&quot; onclick=&quot;closeModal()&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+<br/>
+<br/>
+            &lt;table id=&quot;penalTable&quot; style=&quot;&quot;&gt;<br/>
+                &lt;?php<br/>
+                $query = &quot;SELECT id, name FROM mdt_penal_category&quot;;<br/>
+<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        echo &quot;&lt;tr class=&#39;header expand&#39; id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&lt;th colspan=&#39;3&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+                    }<br/>
+                }<br/>
+                ?&gt;<br/>
+            &lt;/table&gt;<br/>
+<br/>
+<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;clearModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Are you sure you want to clear this call and mark all units 10&ndash;8?&lt;/h1&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Yes&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;logoutModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Are you sure you want to logout &lt;/h1&gt;&lt;br&gt;&lt;h1 style=&#39;text&ndash;decoration: underline;&#39; id=&quot;name&quot;&gt;&lt;/h1&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Yes&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;editModal&quot; class=&quot;modal&quot;&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;div id=&quot;callInput&quot;&gt;<br/>
+                &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+                    &lt;label&gt;Call Type&lt;/label&gt;<br/>
+                    &lt;select id=&quot;type&quot;&gt;<br/>
+                        &lt;option disabled hidden selected value=&#39;Call Type&#39;&gt;Call Type&lt;/option&gt;<br/>
+                        &lt;?php<br/>
+                        $query = &quot;SELECT id, name FROM mdt_call_type&quot;;<br/>
+<br/>
+                        $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                        if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                            // output data of each row<br/>
+                            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                                echo &quot;&lt;option value=&#39;&quot; . $row[&#39;name&#39;] . &quot;&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/option&gt;&quot;;<br/>
+                            }<br/>
+                        }<br/>
+                        ?&gt;<br/>
+                    &lt;/select&gt;<br/>
+                &lt;/div&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+                    &lt;label&gt;Location&lt;/label&gt;<br/>
+                    &lt;input type=&quot;text&quot; id=&quot;location&quot; placeholder=&quot;Location&quot;&gt;<br/>
+                &lt;/div&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+                    &lt;label&gt;Description&lt;/label&gt;<br/>
+                    &lt;textarea id=&#39;description&#39; style=&#39;resize:vertical&#39;&gt;&lt;/textarea&gt;<br/>
+                &lt;/div&gt;<br/>
+                &lt;br&gt;<br/>
+                &lt;div id=&quot;inputDiv&quot;&gt;<br/>
+                    &lt;button id=&quot;edit&quot;&gt;Edit&lt;/button&gt;<br/>
+                    &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+                &lt;/div&gt;<br/>
+            &lt;/div&gt;<br/>
+        &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    function openScreen(open) {<br/>
+        $(&quot;.screen&quot;).hide();<br/>
+        $(open).show();<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    getSignal();<br/>
+    var sound = 0;<br/>
+    function getSignal() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getSignal&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        if (response === &#39;1&#39;) {<br/>
+            $(&#39;#sidebar #signal&#39;).attr(&#39;class&#39;,&#39;active&#39;);<br/>
+            sound = 1 + sound;<br/>
+        } else {<br/>
+            $(&#39;#sidebar #signal&#39;).attr(&#39;class&#39;,&#39;&#39;);<br/>
+            sound = 0;<br/>
+        }<br/>
+    });<br/>
+    <br/>
+    if (sound === 1) {<br/>
+        var signal = new Audio(&quot;&lt;?php echo $defaultURL; ?&gt;/audio/signal.mp3&quot;);<br/>
+        signal.play();<br/>
+    }<br/>
+    setTimeout(getSignal, 2000);<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+        getUnits();<br/>
+function getUnits() { <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getUnits&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#units #unitTable&quot;).html(response);<br/>
+    });<br/>
+setTimeout(getUnits, 5000);   <br/>
+}<br/>
+<br/>
+function changeStatus(id, status) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;changeStatus&#39;,<br/>
+      id: id,<br/>
+      status: status<br/>
+    },<br/>
+    function(response){<br/>
+        getUnits();<br/>
+    });<br/>
+}<br/>
+<br/>
+function changeCall(id, call) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;changeCall&#39;,<br/>
+      id: id,<br/>
+      call: call<br/>
+    },<br/>
+    function(response){<br/>
+        getUnits();<br/>
+    });<br/>
+}<br/>
+<br/>
+function clearCallConfirm(id) {<br/>
+    $(&quot;#clearModal button#yes&quot;).attr(&#39;onclick&#39;,&#39;clearCall(&#39; + id + &#39;)&#39;);<br/>
+    clearOpen();<br/>
+}<br/>
+<br/>
+function logoutUserConfirm(id,name) {<br/>
+    $(&quot;#logoutModal button#yes&quot;).attr(&#39;onclick&#39;,&#39;logoutUser(&#39; + id + &#39;)&#39;);<br/>
+    $(&quot;#logoutModal #name&quot;).text(name);<br/>
+    logoutOpen();<br/>
+}<br/>
+<br/>
+function logoutUser(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;logoutUser&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        closeModal();<br/>
+        getUnits();<br/>
+    });<br/>
+}<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    getCallDispatch();<br/>
+function getCallDispatch() { <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getCallDispatch&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#openCall #openCallTable&quot;).html(response);<br/>
+    });<br/>
+setTimeout(getCallDispatch, 5000);   <br/>
+}<br/>
+<br/>
+function clearCallConfirm(id) {<br/>
+    $(&quot;#clearModal button#yes&quot;).attr(&#39;onclick&#39;,&#39;clearCall(&#39; + id + &#39;)&#39;);<br/>
+    clearOpen();<br/>
+}<br/>
+<br/>
+function clearCall(id) { <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;clearCall&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        closeModal();<br/>
+        getCallDispatch();<br/>
+    });<br/>
+}<br/>
+<br/>
+function editCall(id) {<br/>
+    <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;editCallGet&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        $(&quot;#editModal #location&quot;).val(response[0]);<br/>
+        $(&quot;#editModal #description&quot;).val(response[1]);<br/>
+        $(&quot;#editModal #type&quot;).val(response[2]);<br/>
+        $(&quot;#editModal #edit&quot;).val(id);<br/>
+    });<br/>
+    <br/>
+    editOpen();<br/>
+}<br/>
+<br/>
+$(&quot;#editModal #edit&quot;).click(function(){<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;editCall&#39;,<br/>
+      type: $(&quot;#editModal #type&quot;).val(),<br/>
+      location: $(&quot;#editModal #location&quot;).val(),<br/>
+      description: $(&quot;#editModal #description&quot;).val(),<br/>
+      id:  $(&quot;#editModal #edit&quot;).val()<br/>
+    },<br/>
+    function(response){<br/>
+        getCallDispatch();<br/>
+    });<br/>
+    <br/>
+    <br/>
+    closeModal();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    $(&quot;#call #create&quot;).click(function(){<br/>
+  var type = $( &quot;#call #type option:selected&quot; ).text();<br/>
+  var location = $(&quot;#call input#location&quot;).val();<br/>
+  var postal = $(&quot;#call input#postal&quot;).val();<br/>
+  var description = $(&quot;#call textarea#description&quot;).val();<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;createCall&#39;,<br/>
+      type: type,<br/>
+      location: location,<br/>
+      postal: postal,<br/>
+      description: description<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#call alert&quot;).html(response);<br/>
+        if (response === &quot;&quot;) {<br/>
+            $(&quot;#call #type&quot;).val(&quot;Call Type&quot;);<br/>
+            $(&quot;#call #location&quot;).val(&quot;&quot;);<br/>
+            $(&quot;#call #postal&quot;).val(&quot;&quot;);<br/>
+            $(&quot;#call #description&quot;).val(&quot;&quot;);<br/>
+            getCallDispatch();<br/>
+        }<br/>
+    });<br/>
+});<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    var plateSearchId;<br/>
+$(&quot;#plateSearch #search&quot;).click(function(){<br/>
+  $(this).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+  var plate = $(&quot;input#plate&quot;).val();<br/>
+  <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchPlate&#39;,<br/>
+      plate: plate<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+        <br/>
+        if (response[0] === &quot;No Results&quot;) {<br/>
+              $(&quot;#plateSearch alert&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).hide();<br/>
+        } else {<br/>
+              if (response[0] === &quot;multiple&quot;) {<br/>
+              $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Plate&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+              nameOpen();<br/>
+          } else {<br/>
+              $(&quot;#plateSearch alert&quot;).hide();<br/>
+              //$(&quot;#nameInput&quot;).hide();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults #plate&quot;).html(&quot;Plate: &quot; + response[1]);<br/>
+              $(&quot;#plateSearch #searchResults #model&quot;).html(&quot;Model: &quot; + response[2]);<br/>
+              $(&quot;#plateSearch #searchResults #owner&quot;).html(&quot;Owner: &quot; + response[3]);<br/>
+              $(&quot;#plateSearch #searchResults #description&quot;).html(&quot;Description: &quot; + response[4]);<br/>
+              $(&quot;#plateSearch #searchResults #reg&quot;).html(&quot;Registration: &quot; + response[5]);<br/>
+              $(&quot;#plateSearch #searchResults #insurance&quot;).html(&quot;Insurance: &quot; + response[6]);<br/>
+              $(&quot;#plateSearch #searchResults #flags&quot;).html(&quot;Flags: &quot; + response[7]);<br/>
+              $(&quot;#plateSearch input#plate&quot;).attr(&#39;plateid&#39;,response[8]);<br/>
+              plateReport();<br/>
+              }<br/>
+        }<br/>
+    });<br/>
+    <br/>
+});<br/>
+<br/>
+function plateReport() {<br/>
+    var plate = $(&quot;#plateSearch #plate&quot;).attr(&#39;plateid&#39;);<br/>
+    var type = $(&quot;#plateSearch #plateReportSelect option:selected&quot; ).val();<br/>
+    console.log(type);<br/>
+    //var plate = $(&quot;#plateSearch input#plate&quot;).val();<br/>
+    console.log(plate);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;plateReport&#39;,<br/>
+      plate: plate,<br/>
+      type: type<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(&quot;#plateSearch #searchResults #plateReportTable&quot;).html(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+function plateReportDetailed(id) {<br/>
+    var type = $(&quot;#plateSearch #plateReportSelect option:selected&quot; ).val();<br/>
+     if ($(&#39;#&#39; + id).nextUntil(&#39;#plateReportTable tr.header&#39;).length === 0) {<br/>
+     console.log(&#39;yo&#39;);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;plateReportDetailed&#39;,<br/>
+      type: type,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        $(response).insertAfter(&quot;#plateReportTable #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#plateReportTable tr&#39;).not(&#39;#plateReportTable tr.header&#39;).remove();<br/>
+}<br/>
+<br/>
+<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function searchPlateMultiple(id) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;searchPlateMultiple&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+        response = JSON.parse(response);<br/>
+              $(&quot;#plateSearch alert&quot;).hide();<br/>
+              $(&quot;#plateSearch #searchResults&quot;).show();<br/>
+              $(&quot;#plateSearch #searchResults #plate&quot;).html(&quot;Plate: &quot; + response[1]);<br/>
+              $(&quot;#plateSearch #searchResults #model&quot;).html(&quot;Model: &quot; + response[2]);<br/>
+              $(&quot;#plateSearch #searchResults #owner&quot;).html(&quot;Owner: &quot; + response[3]);<br/>
+                    $(&quot;#plateSearch #searchResults #description&quot;).html(&quot;Description: &quot; + response[4]);<br/>
+                    $(&quot;#plateSearch #searchResults #reg&quot;).html(&quot;Registration: &quot; + response[5]);<br/>
+                    $(&quot;#plateSearch #searchResults #insurance&quot;).html(&quot;Insurance: &quot; + response[6]);<br/>
+                    document.getElementById(&#39;nameModal&#39;).style.display = &#39;none&#39;;<br/>
+                    $(&quot;#plateSearch #searchResults #flags&quot;).html(&quot;Flags: &quot; + response[7]);<br/>
+                    $(&quot;#plateSearch input#plate&quot;).attr(&#39;plateid&#39;, response[8]);<br/>
+                    console.log(response[8]);<br/>
+                    plateReport();<br/>
+                });<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    $(&quot;#nameSearch #search&quot;).click(function () {<br/>
+        $(this).attr(&#39;class&#39;, &#39;selected&#39;);<br/>
+        var first = $(&quot;input#first&quot;).val();<br/>
+        var last = $(&quot;input#last&quot;).val();<br/>
+<br/>
+        $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+                {<br/>
+                    function: &#39;searchName&#39;,<br/>
+                    first: first,<br/>
+                    last: last<br/>
+                },<br/>
+                function (response) {<br/>
+                    console.log(response);<br/>
+                    response = JSON.parse(response);<br/>
+<br/>
+                    if (response[0] === &quot;No Results&quot;) {<br/>
+                        $(&quot;#nameSearch alert&quot;).show();<br/>
+                        $(&quot;#nameSearch #searchResults&quot;).hide();<br/>
+                    } else {<br/>
+                        if (response[0] === &quot;multiple&quot;) {<br/>
+                            $(&quot;#civTable&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;DOB&lt;/th&gt;&lt;th&gt;Civ&lt;/th&gt;&lt;/tr&gt;&quot; + response[1]);<br/>
+                            nameOpen();<br/>
+                        } else {<br/>
+                            $(&quot;#nameSearch alert&quot;).hide();<br/>
+                            //$(&quot;#nameInput&quot;).hide();<br/>
+                            $(&quot;#nameSearch #searchResults&quot;).show();<br/>
+                            $(&quot;#nameSearch #searchResults #name&quot;).html(&quot;Name: &quot; + response[1] + &quot; &quot; + response[2]);<br/>
+                            $(&quot;#nameSearch #searchResults #dob&quot;).html(&quot;DOB: &quot; + response[3]);<br/>
+                            $(&quot;#nameSearch #searchResults #gender&quot;).html(&quot;Gender: &quot; + response[4]);<br/>
+                            $(&quot;#nameSearch #searchResults #address&quot;).html(&quot;Address: &quot; + response[5]);<br/>
+                            $(&quot;#nameSearch #searchResults #lic&quot;).html(response[6]);<br/>
+                            $(&quot;#nameSearch #searchResults #weapon&quot;).html(response[7]);<br/>
+                            getSearchedNameVehicles(response[8]);<br/>
+                            $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;, response[8]);<br/>
+                            nameReport();<br/>
+                        }<br/>
+                    }<br/>
+                });<br/>
+<br/>
+    });<br/>
+<br/>
+    function nameReport() {<br/>
+        var name = $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;);<br/>
+        var type = $(&quot;#nameSearch #nameReportSelect option:selected&quot;).val();<br/>
+        console.log(type);<br/>
+        //var plate = $(&quot;#plateSearch input#plate&quot;).val();<br/>
+        console.log(plate);<br/>
+        $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+                {<br/>
+                    function: &#39;nameReport&#39;,<br/>
+                    name: name,<br/>
+                    type: type<br/>
+                },<br/>
+                function (response) {<br/>
+                    console.log(response);<br/>
+                    $(&quot;#nameSearch #searchResults #nameReportTable&quot;).html(response);<br/>
+                });<br/>
+    }<br/>
+<br/>
+    function nameReportDetailed(id) {<br/>
+        var type = $(&quot;#nameSearch #nameReportSelect option:selected&quot;).val();<br/>
+        if ($(&#39;#&#39; + id).nextUntil(&#39;#nameReportTable tr.header&#39;).length === 0) {<br/>
+            console.log(&#39;yo&#39;);<br/>
+            $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+                    {<br/>
+                        function: &#39;nameReportDetailed&#39;,<br/>
+                        type: type,<br/>
+                        id: id<br/>
+                    },<br/>
+                    function (response) {<br/>
+                        console.log(response);<br/>
+                        $(response).insertAfter(&quot;#nameReportTable #&quot; + id);<br/>
+                    });<br/>
+        }<br/>
+        $(&#39;#nameReportTable tr&#39;).not(&#39;#nameReportTable tr.header&#39;).remove();<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    function searchNameMultiple(id) {<br/>
+        $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+                {<br/>
+                    function: &#39;searchNameMultiple&#39;,<br/>
+                    id: id<br/>
+                },<br/>
+                function (response) {<br/>
+                    console.log(response);<br/>
+                    response = JSON.parse(response);<br/>
+                    $(&quot;#nameSearch alert&quot;).hide();<br/>
+                    //$(&quot;#nameInput&quot;).hide();<br/>
+                    $(&quot;#nameSearch #searchResults&quot;).show();<br/>
+                    $(&quot;#nameSearch #searchResults #name&quot;).html(&quot;Name: &quot; + response[1] + &quot; &quot; + response[2]);<br/>
+                    $(&quot;#nameSearch #searchResults #dob&quot;).html(&quot;DOB: &quot; + response[3]);<br/>
+                    $(&quot;#nameSearch #searchResults #gender&quot;).html(&quot;Gender: &quot; + response[4]);<br/>
+                    $(&quot;#nameSearch #searchResults #address&quot;).html(&quot;Address: &quot; + response[5]);<br/>
+                    $(&quot;#nameSearch #searchResults #lic&quot;).html(response[6]);<br/>
+                    $(&quot;#nameSearch #searchResults #weapon&quot;).html(response[7]);<br/>
+                    getSearchedNameVehicles(response[8]);<br/>
+                    $(&quot;#nameSearch input#first&quot;).attr(&#39;nameid&#39;, response[8]);<br/>
+                    nameReport();<br/>
+                    document.getElementById(&#39;nameModal&#39;).style.display = &#39;none&#39;;<br/>
+                });<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    function getSearchedNameVehicles(id) {<br/>
+        $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+                {<br/>
+                    function: &#39;getSearchedNameVehicles&#39;,<br/>
+                    id: id<br/>
+                },<br/>
+                function (response) {<br/>
+                    $(&quot;#nameSearch #searchResults #vehicles&quot;).html(&quot;&lt;tr&gt;&lt;th&gt;Plate&lt;/th&gt;&lt;th&gt;Model&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;&quot; + response);<br/>
+                });<br/>
+    }<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+$(&#39;#penalModal .header&#39;).click(function(){<br/>
+     if ($(this).nextUntil(&#39;#penalModal tr.header&#39;).length === 0) {<br/>
+     var id = $(this)[0].id;<br/>
+     <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getPenal&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(response).insertAfter(&quot;#penalModal #&quot;+id);<br/>
+    });<br/>
+    }<br/>
+    $(&#39;#penalModal tr&#39;).not(&#39;#penalModal tr.header&#39;).remove();<br/>
+});<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function nameOpen() {<br/>
+document.getElementById(&#39;nameModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function penalOpen() {<br/>
+document.getElementById(&#39;penalModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function clearOpen() {<br/>
+document.getElementById(&#39;clearModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function logoutOpen() {<br/>
+document.getElementById(&#39;logoutModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function editOpen() {<br/>
+document.getElementById(&#39;editModal&#39;).style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+function closeModal() {<br/>
+$(&quot;.modal&quot;).hide();<br/>
+}<br/>
+<br/>
+window.onclick = function(event) {<br/>
+if ($(event.target).hasClass(&quot;modal&quot;)) {<br/>
+$(&quot;.modal&quot;).hide();<br/>
+}};<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    function signal() {   <br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;signal&#39;<br/>
+    },<br/>
+    function(){<br/>
+        getSignal();<br/>
+    });<br/>
+    }<br/>
+&lt;/script&gt;</body></html>

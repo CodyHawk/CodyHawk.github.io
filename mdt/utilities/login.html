@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+if(!empty($_POST)) {<br/>
+        $email = htmlspecialchars($_POST[&#39;email&#39;]);<br/>
+        $password = htmlspecialchars($_POST[&#39;pass&#39;]);<br/>
+        $serverNumber = htmlspecialchars($_POST[&#39;server&#39;]);<br/>
+<br/>
+    $query = &quot;SELECT user_id, name, password, admin, steam FROM mdt_users WHERE email = ?&quot;;<br/>
+        <br/>
+        try {<br/>
+            $stmt = mysqli_prepare($conn, $query);<br/>
+            mysqli_stmt_bind_param($stmt, &quot;s&quot;, $email);<br/>
+            $result = mysqli_stmt_execute($stmt);<br/>
+<br/>
+            if ($result == FALSE) {<br/>
+                die(mysqli_error($conn));<br/>
+            }<br/>
+        }<br/>
+        catch (Exception $e)<br/>
+        {<br/>
+            die(&quot;Failed to run query: &quot; . $e&ndash;&gt;getMessage());<br/>
+        }<br/>
+        <br/>
+        mysqli_stmt_bind_result($stmt, $user_id, $name, $fetchedPassword, $admin, $steam);<br/>
+        mysqli_stmt_fetch($stmt);<br/>
+        <br/>
+        $login_ok = false;<br/>
+        <br/>
+    if (password_verify($password, $fetchedPassword)) {<br/>
+        $login_ok = true;<br/>
+    } else {<br/>
+        session_start();<br/>
+        $_SESSION[&#39;loginError&#39;] = &#39;Invalid credentials&#39;;<br/>
+        header(&quot;Location:$defaultURL/index.php&quot;);<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if ($serverNumber == Server) {<br/>
+        session_start();<br/>
+        $_SESSION[&#39;loginError&#39;] = &#39;Please select a server&#39;;<br/>
+        header(&quot;Location:$defaultURL/index.php&quot;);<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+        session_start();<br/>
+        $_SESSION[&#39;user_loggedIn&#39;] = &#39;logged in&#39;;<br/>
+        $_SESSION[&#39;user_id&#39;] = $user_id;<br/>
+        $_SESSION[&#39;user_email&#39;] = $email;<br/>
+        $_SESSION[&#39;user_name&#39;] = $name;<br/>
+        $_SESSION[&#39;user_admin&#39;] = $admin;<br/>
+        $_SESSION[&#39;user_server&#39;] = $serverNumber;<br/>
+        if ($steam == 0) {<br/>
+            header(&quot;Location:$defaultURL?link=1&quot;);<br/>
+            exit();<br/>
+        }<br/>
+        header(&quot;Location:$defaultURL/dashboard.php&quot;);<br/>
+}<br/>
+<br/>
+?&gt;</body></html>

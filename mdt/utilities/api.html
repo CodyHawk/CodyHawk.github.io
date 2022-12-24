@@ -1,0 +1,1112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+require &#39;q3query.class.php&#39;;<br/>
+include(&#39;../settings.php&#39;);<br/>
+session_start();<br/>
+date_default_timezone_set(&#39;America/Los_Angeles&#39;);<br/>
+$date = date(&quot;m&ndash;d&ndash;Y H:i:s&quot;);<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;setDepartment&#39;) {<br/>
+    session_start();<br/>
+    $_SESSION[&#39;departmentID&#39;] = $_POST[&#39;departmentID&#39;];<br/>
+    $departmentID = $_POST[&#39;departmentID&#39;];<br/>
+    $_SESSION[&#39;divisonID&#39;] = $_POST[&#39;divisonID&#39;];<br/>
+    $divisonID = $_POST[&#39;divisonID&#39;];<br/>
+    <br/>
+    $result = mysqli_query($conn, &quot;SELECT * FROM mdt_departments WHERE id=&#39;$departmentID&#39; LIMIT 1&quot;);<br/>
+    while($row = mysqli_fetch_assoc($result)) {<br/>
+    $_SESSION[&#39;departmentName&#39;] = $row[&#39;abbreviation&#39;];<br/>
+    }<br/>
+    <br/>
+    $result = mysqli_query($conn, &quot;SELECT * FROM mdt_divisions WHERE id=&#39;$divisonID&#39; LIMIT 1&quot;);<br/>
+    while($row = mysqli_fetch_assoc($result)) {<br/>
+    $_SESSION[&#39;divisonName&#39;] = $row[&#39;abbreviation&#39;];<br/>
+    }<br/>
+<br/>
+    header(&quot;Location:$defaultURL/dashboard.php&quot;);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getAOP&#39;) {<br/>
+    if (empty($_SESSION[&#39;user_loggedIn&#39;])) {<br/>
+        echo &quot;logout&quot;;<br/>
+    } else {<br/>
+        <br/>
+        $serverID = $_SESSION[&#39;user_server&#39;];<br/>
+    $query = &quot;SELECT aop FROM mdt_server WHERE id=&#39;$serverID&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            if($_SESSION[&#39;user_admin&#39;]) {<br/>
+                echo &quot;&lt;a href=&#39;javascript:aopOpen();&#39;&gt;AOP: &quot; . $row[&#39;aop&#39;] .&quot;&lt;/a&gt;&quot;;}else {echo &#39;AOP: &#39; . $row[&#39;aop&#39;];}<br/>
+        }<br/>
+    }<br/>
+}<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;submitAOP&#39;) {<br/>
+    if($_SESSION[&#39;user_admin&#39;]) {<br/>
+    $serverID = $_SESSION[&#39;user_server&#39;];<br/>
+    $aop = $_POST[&#39;aop&#39;];<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_server SET aop=&#39;$aop&#39; WHERE id=&#39;$serverID&#39;&quot;;<br/>
+<br/>
+    mysqli_query($conn, $query);<br/>
+} else {<br/>
+    echo &quot;not today&quot;;<br/>
+}}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getCiv&#39;) {<br/>
+    $civID = $_POST[&#39;civID&#39;];<br/>
+    unset($_SESSION[&#39;currentCiv&#39;]);<br/>
+    $_SESSION[&#39;currentCiv&#39;] = $civID;<br/>
+    $query = &quot;SELECT first, last, dob, gender, address, lic, weapon FROM mdt_characters WHERE id=&#39;$civID&#39;&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo json_encode(array($row[&#39;first&#39;] , $row[&#39;last&#39;] , $row[&#39;dob&#39;] , $row[&#39;gender&#39;] , $row[&#39;address&#39;] , $row[&#39;lic&#39;] , $row[&#39;weapon&#39;]));<br/>
+    }<br/>
+}<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getVeh&#39;) {<br/>
+    $vehID = $_POST[&#39;vehID&#39;];<br/>
+    unset($_SESSION[&#39;currentVeh&#39;]);<br/>
+    $_SESSION[&#39;currentVeh&#39;] = $vehID;<br/>
+    $query = &quot;SELECT model, plate, description, reg, insurance, flags, characterID FROM mdt_vehicles WHERE id=&#39;$vehID&#39;&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    <br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            <br/>
+        //echo $row[&#39;model&#39;];<br/>
+        echo json_encode(array($row[&#39;model&#39;],$row[&#39;plate&#39;],$row[&#39;description&#39;],$row[&#39;reg&#39;],$row[&#39;insurance&#39;],$row[&#39;flags&#39;],$row[&#39;characterID&#39;]));<br/>
+    }<br/>
+}<br/>
+}<br/>
+<br/>
+if (isset($_POST[&#39;submitCiv&#39;])) {<br/>
+    $ownerID = $_SESSION[&#39;user_id&#39;];<br/>
+    $id = $_POST[&#39;nameSelect&#39;];<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $dob = $_POST[&#39;dob&#39;];<br/>
+    $gender = $_POST[&#39;gender&#39;];<br/>
+    $address = $_POST[&#39;address&#39;];<br/>
+    $lic = $_POST[&#39;lic&#39;];<br/>
+    $weapon = $_POST[&#39;weapon&#39;];<br/>
+    <br/>
+    if ($_POST[&#39;nameSelect&#39;] == &#39;add&#39;) {<br/>
+    $query = &quot;INSERT INTO mdt_characters (ownerID, first, last, dob, gender, address, lic, weapon) VALUES (&#39;$ownerID&#39;, &#39;$first&#39;, &#39;$last&#39;, &#39;$dob&#39;, &#39;$gender&#39;, &#39;$address&#39;, &#39;$lic&#39;, &#39;$weapon&#39;)&quot;;<br/>
+    <br/>
+    mysqli_query($conn, $query);<br/>
+    header(&quot;Location:$defaultURL/civ&quot;);  <br/>
+} else {<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_characters SET first=&#39;$first&#39;, last=&#39;$last&#39;, dob=&#39;$dob&#39;, gender=&#39;$gender&#39;, address=&#39;$address&#39;, lic=&#39;$lic&#39;, weapon=&#39;$weapon&#39; WHERE id=&#39;$id&#39;&quot;;<br/>
+<br/>
+        mysqli_query($conn, $query);<br/>
+        header(&quot;Location:$defaultURL/civ&quot;);<br/>
+    }<br/>
+}<br/>
+<br/>
+if (isset($_POST[&#39;deleteCiv&#39;])) {<br/>
+    $id = $_POST[&#39;nameSelect&#39;];<br/>
+    $query = &quot;DELETE FROM mdt_characters WHERE id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    unset($_SESSION[&#39;currentCiv&#39;]);<br/>
+    header(&quot;Location:$defaultURL/civ&quot;);<br/>
+}<br/>
+<br/>
+if (isset($_POST[&#39;submitVeh&#39;])) {<br/>
+    $ownerID = $_SESSION[&#39;user_id&#39;];<br/>
+    $id = $_POST[&#39;vehicleSelect&#39;];<br/>
+    $model = $_POST[&#39;model&#39;];<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    $reg = $_POST[&#39;reg&#39;];<br/>
+    $insurance = $_POST[&#39;insurance&#39;];<br/>
+    $flags = $_POST[&#39;flags&#39;];<br/>
+    $characterID = $_POST[&#39;owner&#39;];<br/>
+    <br/>
+    if ($_POST[&#39;vehicleSelect&#39;] == &#39;add&#39;) {<br/>
+    $query = &quot;INSERT INTO mdt_vehicles (ownerID, characterID, model, plate, description, reg, insurance, flags) VALUES (&#39;$ownerID&#39;, &#39;$characterID&#39;, &#39;$model&#39;, &#39;$plate&#39;, &#39;$description&#39;, &#39;$reg&#39;, &#39;$insurance&#39;, &#39;$flags&#39;)&quot;;<br/>
+    <br/>
+    mysqli_query($conn, $query);<br/>
+    header(&quot;Location:$defaultURL/civ&quot;);<br/>
+    <br/>
+} else{<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_vehicles SET characterID=&#39;$characterID&#39;, model=&#39;$model&#39;, plate=&#39;$plate&#39;, description=&#39;$description&#39;, reg=&#39;$reg&#39;, insurance=&#39;$insurance&#39;, flags=&#39;$flags&#39; WHERE id=&#39;$id&#39;&quot;;<br/>
+<br/>
+        mysqli_query($conn, $query);<br/>
+        header(&quot;Location:$defaultURL/civ&quot;);<br/>
+    }<br/>
+}<br/>
+<br/>
+if (isset($_POST[&#39;deleteVeh&#39;])) {<br/>
+    $id = $_POST[&#39;vehicleSelect&#39;];<br/>
+    $query = &quot;DELETE FROM mdt_vehicles WHERE id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    unset($_SESSION[&#39;currentVeh&#39;]);<br/>
+    header(&quot;Location:$defaultURL/civ&quot;);<br/>
+}<br/>
+<br/>
+if (isset($_POST[&#39;submitIdentifier&#39;])) {<br/>
+    $department = $_SESSION[&#39;departmentName&#39;];<br/>
+    $divison = $_SESSION[&#39;divisonName&#39;];<br/>
+    $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+    $identifier = $_POST[&#39;identifier&#39;];<br/>
+    $serverID = $_SESSION[&#39;user_server&#39;];<br/>
+    $result = mysqli_query($conn, &quot;SELECT * FROM active_users WHERE user_id=&#39;$user_id&#39; LIMIT 1&quot;);<br/>
+    if (mysqli_fetch_row($result)) {<br/>
+        $query = &quot;UPDATE mdt_active_users SET identifier=&#39;$identifier&#39;, server=&#39;$serverID&#39; WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+    } else {<br/>
+        $query = &quot;INSERT INTO mdt_active_users (user_id, identifier, server, department, divison) VALUES (&#39;$user_id&#39;, &#39;$identifier&#39;, &#39;$serverID&#39;, &#39;$department&#39;, &#39;$divison&#39;)&quot;;<br/>
+    }<br/>
+    <br/>
+    $_SESSION[&#39;user_identifier&#39;] = $identifier;<br/>
+    mysqli_query($conn, $query);<br/>
+    if ($_SESSION[&#39;departmentName&#39;] === &quot;Dispatch&quot;) {<br/>
+        header(&quot;Location:$defaultURL/dispatch&quot;);<br/>
+    } else {<br/>
+        header(&quot;Location:$defaultURL/leo&quot;);<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;submitStatus&#39;) {     <br/>
+    $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+    $status = $_POST[&#39;status&#39;];<br/>
+    $query = &quot;UPDATE mdt_active_users SET status=&#39;$status&#39; WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+    $_SESSION[&#39;status&#39;] = $status;<br/>
+    mysqli_query($conn, $query);<br/>
+    echo $status;<br/>
+    if ($status == &quot;10&ndash;8&quot;) {<br/>
+        $query = &quot;UPDATE mdt_active_users SET callID=&#39;0&#39; WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+        mysqli_query($conn, $query);<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getStatus&#39;) {<br/>
+    $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_active_users WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo $row[&#39;status&#39;];<br/>
+            $_SESSION[&#39;status&#39;] = $row[&#39;status&#39;];<br/>
+            if ($row[&#39;status&#39;] == &quot;10&ndash;8&quot;) {<br/>
+                $query = &quot;UPDATE mdt_active_users SET callID=&#39;0&#39; WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+                mysqli_query($conn, $query);<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+    if ($_POST[&#39;function&#39;] == &#39;getCall&#39;) {<br/>
+    $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_active_users WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $callID = $row[&#39;callID&#39;];<br/>
+            if ($row[&#39;logout&#39;] == 1) {<br/>
+                header(&quot;Location:$defaultURL/utilities/logout.php&quot;);<br/>
+                exit();<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+<br/>
+    $query = &quot;SELECT id, type, location, details FROM mdt_calls WHERE id=&#39;$callID&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo json_encode(array($row[&#39;id&#39;],$row[&#39;type&#39;],$row[&#39;location&#39;],$row[&#39;details&#39;]));<br/>
+        }<br/>
+    } else {<br/>
+        echo &quot;none&quot;;<br/>
+    }<br/>
+}<br/>
+<br/>
+//tbh i dont even know how i made this<br/>
+//get search name<br/>
+<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchName&#39;) {<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, first, last, dob, gender, address, lic, weapon FROM mdt_characters WHERE first=&#39;$first&#39; AND last=&#39;$last&#39;&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            if ($result&ndash;&gt;num_rows === 1) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo json_encode(array(&quot;single&quot;,$row[&#39;first&#39;],$row[&#39;last&#39;],$row[&#39;dob&#39;],$row[&#39;gender&#39;],$row[&#39;address&#39;],$row[&#39;lic&#39;],$row[&#39;weapon&#39;],$row[&#39;id&#39;]));<br/>
+        $_SESSION[&#39;searchedNameID&#39;] = $row[&#39;id&#39;];<br/>
+        }<br/>
+    } else {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:searchNameMultiple(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&quot; . $row[&#39;first&#39;] . &#39; &#39; . $row[&#39;last&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;dob&#39;]  . &#39;&lt;/td&gt;&lt;td&gt;&#39; . ownerName($row[&#39;ownerID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+<br/>
+} else {<br/>
+    echo json_encode(array(&quot;No Results&quot;));<br/>
+}}<br/>
+<br/>
+function ownerName($id) {<br/>
+    include(&#39;../settings.php&#39;);<br/>
+    $query = &quot;SELECT * FROM mdt_users WHERE user_id=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            return $row[&#39;name&#39;];<br/>
+        }<br/>
+    } else {<br/>
+        return &quot;No name for $id&quot;;<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchNameMultiple&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT id, first, last, dob, gender, address, lic, weapon FROM mdt_characters WHERE id=&#39;$id&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;,$row[&#39;first&#39;],$row[&#39;last&#39;],$row[&#39;dob&#39;],$row[&#39;gender&#39;],$row[&#39;address&#39;],$row[&#39;lic&#39;],$row[&#39;weapon&#39;],$row[&#39;id&#39;]));<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+    <br/>
+if ($_POST[&#39;function&#39;] == &#39;getSearchedNameVehicles&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT plate, model, description FROM mdt_vehicles WHERE characterID=&#39;$id&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo &#39;&lt;tr&gt;&lt;td&gt;&#39; . $row[&#39;plate&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;model&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;description&#39;] . &#39;&lt;/td&gt;&lt;/tr&gt;&#39;;<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+    <br/>
+    //Get searched vehicles<br/>
+    <br/>
+    if ($_POST[&#39;function&#39;] == &#39;searchPlate&#39;) {<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, characterID, model, plate, description, reg, insurance, flags FROM mdt_vehicles WHERE plate=&#39;$plate&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;,$row[&#39;plate&#39;],$row[&#39;model&#39;],characterName($row[&#39;characterID&#39;]),$row[&#39;description&#39;],$row[&#39;reg&#39;],$row[&#39;insurance&#39;],$row[&#39;flags&#39;],$row[&#39;id&#39;]));<br/>
+                $_SESSION[&#39;searchedNameID&#39;] = $row[&#39;id&#39;];<br/>
+            }<br/>
+        } else {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:searchPlateMultiple(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&quot; . $row[&#39;plate&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;description&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . characterName($row[&#39;characterID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+            }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+    } else {<br/>
+        echo json_encode(array(&quot;No Results&quot;));<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchPlateMultiple&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, characterID, model, plate, description, reg, insurance, flags FROM mdt_vehicles WHERE id=&#39;$id&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo json_encode(array(&quot;single&quot;,$row[&#39;plate&#39;],$row[&#39;model&#39;],characterName($row[&#39;characterID&#39;]),$row[&#39;description&#39;],$row[&#39;reg&#39;],$row[&#39;insurance&#39;],$row[&#39;flags&#39;],$row[&#39;id&#39;]));<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+function characterName($id) {<br/>
+    include(&#39;../settings.php&#39;);<br/>
+    $query = &quot;SELECT * FROM mdt_characters WHERE id=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            return $row[&#39;first&#39;] . &#39; &#39; . $row[&#39;last&#39;];<br/>
+        }<br/>
+    } else {<br/>
+        return &quot;?&quot;;<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getPenal&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_penal_charges WHERE cat=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr&gt;&lt;td&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;punishment&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getPenalCitations&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_penal_charges WHERE cat=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:citationAdd(&quot;. $row[&#39;id&#39;] . &quot;);&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;punishment&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getPenalFromId&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_penal_charges WHERE id=&#39;$id&#39; LIMIT 1&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo json_encode(array(&quot;&lt;tr&gt;&lt;td onclick=&#39;&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;punishment&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&lt;span class=&#39;close&#39; onclick=&#39;$(this).parent().parent().remove();&#39;&gt;&amp;times;&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&quot;,$row[&#39;fine&#39;],$row[&#39;jail&#39;]));<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;submitCitation&#39;) {<br/>
+    <br/>
+    if (!isset($_POST[&#39;infraction&#39;])) {<br/>
+        echo &quot;Please add a infraction!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if (!isset($_POST[&#39;characterId&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (!doesCivExist($_POST[&#39;first&#39;], $_POST[&#39;last&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (isset($_POST[&#39;location&#39;])) {<br/>
+    if ($_POST[&#39;location&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please add a location!&quot;;<br/>
+        exit();<br/>
+    }}<br/>
+<br/>
+    if (isset($_POST[&#39;fine&#39;])) {<br/>
+    if ($_POST[&#39;fine&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please add a fine!&quot;;<br/>
+        exit();<br/>
+    }}<br/>
+    <br/>
+    $characterId = $_POST[&#39;characterId&#39;];<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $plateId = $_POST[&#39;plateId&#39;];<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    $infraction = json_encode($_POST[&#39;infraction&#39;]);<br/>
+    $location = $_POST[&#39;location&#39;];<br/>
+    $fine = $_POST[&#39;fine&#39;];<br/>
+<br/>
+    $query = &quot;INSERT INTO mdt_tickets (charaterId, first, last, plateId, plate, description, infraction, location, fine, date, officer) VALUES (&#39;$characterId&#39;, &#39;$first&#39;, &#39;$last&#39;, &#39;$plateId&#39;, &#39;$plate&#39;, &#39;$description&#39;, &#39;$infraction&#39;, &#39;$location&#39;, &#39;$fine&#39;, &#39;$date&#39;, &#39;&quot; . $_SESSION[&#39;user_identifier&#39;] . &quot; [&quot; . $_SESSION[&#39;departmentName&#39;] . &quot;]&#39;)&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+function doesCivExist($first, $last) {<br/>
+    include(&#39;../settings.php&#39;);<br/>
+    $query = &quot;SELECT * FROM mdt_characters WHERE first=&#39;$first&#39; AND last=&#39;$last&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            return true;<br/>
+    } else {<br/>
+            return false;<br/>
+        }<br/>
+    }<br/>
+    <br/>
+if ($_POST[&#39;function&#39;] == &#39;doesPlateExist&#39;) {<br/>
+   $plate = $_POST[&#39;plate&#39;];<br/>
+   <br/>
+    $query = &quot;SELECT * FROM mdt_vehicles WHERE plate=&#39;$plate&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;,$row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;]));<br/>
+        }<br/>
+    } else {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;  . &#39;&quot;&#39; . &quot;javascript:searchPlateCitation(&quot; . $row[&#39;id&#39;] . &quot;,&#39;&quot; . $row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;] . &quot;&#39;)&quot; . &#39;&quot;&#39; . &quot;&gt;&quot; . $row[&#39;plate&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;description&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . characterName($row[&#39;characterID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+}<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchNameCitation&#39;) {<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, first, last, dob FROM mdt_characters WHERE first=&#39;$first&#39; AND last=&#39;$last&#39;&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            if ($result&ndash;&gt;num_rows === 1) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo json_encode(array(&quot;single&quot;,$row[&#39;id&#39;]));<br/>
+        }<br/>
+    } else {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:searchNameCitation(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&quot; . $row[&#39;first&#39;] . &#39; &#39; . $row[&#39;last&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;dob&#39;]  . &#39;&lt;/td&gt;&lt;td&gt;&#39; . ownerName($row[&#39;ownerID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+} else {<br/>
+    echo json_encode(array(&quot;No Results&quot;));<br/>
+}}<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;submitWarning&#39;) {<br/>
+    <br/>
+    if (!isset($_POST[&#39;infraction&#39;])) {<br/>
+        echo &quot;Please add a infraction!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if (!isset($_POST[&#39;characterId&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (!doesCivExist($_POST[&#39;first&#39;], $_POST[&#39;last&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (isset($_POST[&#39;location&#39;])) {<br/>
+    if ($_POST[&#39;location&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please add a location!&quot;;<br/>
+        exit();<br/>
+    }}<br/>
+<br/>
+    $characterId = $_POST[&#39;characterId&#39;];<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $plateId = $_POST[&#39;plateId&#39;];<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    $infraction = json_encode($_POST[&#39;infraction&#39;]);<br/>
+    $location = $_POST[&#39;location&#39;];<br/>
+<br/>
+    $query = &quot;INSERT INTO mdt_warnings (charaterId, first, last, plateId, plate, description, infraction, location, date, officer) VALUES (&#39;$characterId&#39;, &#39;$first&#39;, &#39;$last&#39;, &#39;$plateId&#39;, &#39;$plate&#39;, &#39;$description&#39;, &#39;$infraction&#39;, &#39;$location&#39;, &#39;$date&#39;, &#39;&quot; . $_SESSION[&#39;user_identifier&#39;] . &quot; [&quot; . $_SESSION[&#39;departmentName&#39;] . &quot;]&#39;)&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;doesPlateExistWarning&#39;) {<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+<br/>
+    $query = &quot;SELECT * FROM mdt_vehicles WHERE plate=&#39;$plate&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;, $row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;]));<br/>
+            }<br/>
+        } else {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&quot; . &#39;&quot;&#39; . &quot;javascript:searchPlateWarning(&quot; . $row[&#39;id&#39;] . &quot;,&#39;&quot; . $row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;] . &quot;&#39;)&quot; . &#39;&quot;&#39; . &quot;&gt;&quot; . $row[&#39;plate&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;description&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . characterName($row[&#39;characterID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+            }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchNameWarning&#39;) {<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, first, last, dob FROM mdt_characters WHERE first=&#39;$first&#39; AND last=&#39;$last&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;, $row[&#39;id&#39;]));<br/>
+            }<br/>
+        } else {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:searchNameWarning(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&quot; . $row[&#39;first&#39;] . &#39; &#39; . $row[&#39;last&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;dob&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . ownerName($row[&#39;ownerID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+            }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+    } else {<br/>
+        echo json_encode(array(&quot;No Results&quot;));<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getPenalWarnings&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_penal_charges WHERE cat=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:warningAdd(&quot;. $row[&#39;id&#39;] . &quot;);&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;punishment&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;submitArrest&#39;) {<br/>
+<br/>
+    if (!isset($_POST[&#39;infraction&#39;])) {<br/>
+        echo &quot;Please add a charge!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    <br/>
+    if (!isset($_POST[&#39;characterId&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (!doesCivExist($_POST[&#39;first&#39;], $_POST[&#39;last&#39;])) {<br/>
+        echo &quot;Civilian does not exist!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+<br/>
+    if (isset($_POST[&#39;location&#39;])) {<br/>
+    if ($_POST[&#39;location&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please add a location!&quot;;<br/>
+        exit();<br/>
+    }}<br/>
+<br/>
+    if (isset($_POST[&#39;fine&#39;])) {<br/>
+    if ($_POST[&#39;fine&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please add a fine!&quot;;<br/>
+        exit();<br/>
+    }}<br/>
+    <br/>
+    if (isset($_POST[&#39;jail&#39;])) {<br/>
+        if ($_POST[&#39;jail&#39;] == &quot;&quot;) {<br/>
+            echo &quot;Please add a jail!&quot;;<br/>
+            exit();<br/>
+        }<br/>
+    }<br/>
+<br/>
+    $characterId = $_POST[&#39;characterId&#39;];<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $plateId = $_POST[&#39;plateId&#39;];<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    $infraction = json_encode($_POST[&#39;infraction&#39;]);<br/>
+    $location = $_POST[&#39;location&#39;];<br/>
+    $fine = $_POST[&#39;fine&#39;];<br/>
+    $jail = $_POST[&#39;jail&#39;];<br/>
+<br/>
+    $query = &quot;INSERT INTO mdt_arrests (charaterId, first, last, plateId, plate, description, infraction, location, fine, jail, date, officer) VALUES (&#39;$characterId&#39;, &#39;$first&#39;, &#39;$last&#39;, &#39;$plateId&#39;, &#39;$plate&#39;, &#39;$description&#39;, &#39;$infraction&#39;, &#39;$location&#39;, &#39;$fine&#39;, &#39;$jail&#39;, &#39;$date&#39;, &#39;&quot; . $_SESSION[&#39;user_identifier&#39;] . &quot; [&quot; . $_SESSION[&#39;departmentName&#39;] . &quot;]&#39;)&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+    <br/>
+if ($_POST[&#39;function&#39;] == &#39;doesPlateExistArrest&#39;) {<br/>
+    $plate = $_POST[&#39;plate&#39;];<br/>
+<br/>
+    $query = &quot;SELECT * FROM mdt_vehicles WHERE plate=&#39;$plate&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;, $row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;]));<br/>
+            }<br/>
+        } else {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&quot; . &#39;&quot;&#39; . &quot;javascript:searchPlateArrest(&quot; . $row[&#39;id&#39;] . &quot;,&#39;&quot; . $row[&#39;model&#39;] . &#39; &ndash; &#39; . $row[&#39;description&#39;] . &quot;&#39;)&quot; . &#39;&quot;&#39; . &quot;&gt;&quot; . $row[&#39;plate&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;description&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . characterName($row[&#39;characterID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+            }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;searchNameArrest&#39;) {<br/>
+    $first = $_POST[&#39;first&#39;];<br/>
+    $last = $_POST[&#39;last&#39;];<br/>
+    $query = &quot;SELECT ownerID, id, first, last, dob FROM mdt_characters WHERE first=&#39;$first&#39; AND last=&#39;$last&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        if ($result&ndash;&gt;num_rows === 1) {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                echo json_encode(array(&quot;single&quot;, $row[&#39;id&#39;]));<br/>
+            }<br/>
+        } else {<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $response .= &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:searchNameArrest(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&quot; . $row[&#39;first&#39;] . &#39; &#39; . $row[&#39;last&#39;] . &#39;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&#39; . $row[&#39;dob&#39;] . &#39;&lt;/td&gt;&lt;td&gt;&#39; . ownerName($row[&#39;ownerID&#39;]) . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+            }<br/>
+            $arr = array(&#39;multiple&#39;, $response);<br/>
+            echo json_encode($arr);<br/>
+        }<br/>
+    } else {<br/>
+        echo json_encode(array(&quot;No Results&quot;));<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getPenalArrests&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_penal_charges WHERE cat=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;javascript:arrestAdd(&quot; . $row[&#39;id&#39;] . &quot;);&#39;&gt;&quot; . $row[&#39;name&#39;] . &quot;&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $row[&#39;punishment&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;plateReport&#39;) {<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $id = $_POST[&#39;plate&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_$type WHERE plateId=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39; onclick=&#39;plateReportDetailed(&quot; . $row[&#39;id&#39;] . &quot;)&#39; class=&#39;header expand&#39;&gt;&lt;th&gt;#&quot; . $row[&#39;id&#39;] . &quot;&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&quot; . $row[&#39;date&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;plateReportDetailed&#39;) {<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_$type WHERE id=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+        echo &quot;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Driver: &quot; . $row[&#39;first&#39;] . &quot; &quot; . $row[&#39;last&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Location: &quot; . $row[&#39;location&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr colspan=&#39;2&#39;&gt;&lt;td colspan=&#39;2&#39;&gt;Infraction(s): &quot; . substr(str_replace(&#39;&quot;,&quot;&#39;, &quot;, &quot;, $row[&#39;infraction&#39;]), 2, &ndash;2) . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Fine: $&quot; . $row[&#39;fine&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        if ($type === &quot;Arrests&quot;) {echo &quot;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Jail Time: &quot; . $row[&#39;jail&#39;] . &quot; Seconds &lt;/td&gt;&lt;/tr&gt;&quot;;}<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;nameReport&#39;) {<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $id = $_POST[&#39;name&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_$type WHERE charaterId=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+            echo &quot;&lt;tr id=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39; onclick=&#39;nameReportDetailed(&quot; . $row[&#39;id&#39;] . &quot;)&#39; class=&#39;header expand&#39;&gt;&lt;th&gt;#&quot; . $row[&#39;id&#39;] . &quot;&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&quot; . $row[&#39;date&#39;] . &quot;&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;nameReportDetailed&#39;) {<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;SELECT * FROM mdt_$type WHERE id=&#39;$id&#39;&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+<br/>
+        echo &quot;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Person: &quot; . $row[&#39;first&#39;] . &quot; &quot; . $row[&#39;last&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Location: &quot; . $row[&#39;location&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr colspan=&#39;2&#39;&gt;&lt;td colspan=&#39;2&#39;&gt;Infraction(s): &quot; . substr(str_replace(&#39;&quot;,&quot;&#39;, &quot;, &quot;, $row[&#39;infraction&#39;]), 2, &ndash;2) . &quot;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Fine: $&quot; . $row[&#39;fine&#39;] . &quot;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+        if ($type === &quot;Arrests&quot;) {echo &quot;&lt;tr&gt;&lt;td colspan=&#39;2&#39;&gt;Jail Time: &quot; . $row[&#39;jail&#39;] . &quot; Seconds &lt;/td&gt;&lt;/tr&gt;&quot;;}<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;createCall&#39;) {<br/>
+<br/>
+    if ($_POST[&#39;type&#39;] == &quot;Call Type&quot;) {<br/>
+        echo &quot;Please set call type!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if ($_POST[&#39;location&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please set a location!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if ($_POST[&#39;postal&#39;] == &quot;&quot;) {<br/>
+        echo &quot;Please set a postal!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    if (!isset($_POST[&#39;description&#39;])) {<br/>
+        echo &quot;Please set description!&quot;;<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $location = $_POST[&#39;location&#39;];<br/>
+    $postal = $_POST[&#39;postal&#39;];<br/>
+<br/>
+    $query = &quot;INSERT INTO mdt_calls (type, location, details) VALUES (&#39;$type&#39;, &#39;$location / Nearest Postal $postal&#39;, &#39;$description&#39;)&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getCallDispatch&#39;) {<br/>
+    echo &quot;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Call #&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th colspan=&#39;2&#39;&gt;Location&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &quot;;<br/>
+    <br/>
+    $query = &quot;SELECT * FROM mdt_calls&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+    echo &quot;<br/>
+            &lt;tr&gt;<br/>
+                &lt;td&gt;&quot; . $row[&#39;id&#39;] . &quot;&lt;/td&gt;<br/>
+                &lt;td&gt;&quot; . $row[&#39;type&#39;] . &quot;&lt;/td&gt;<br/>
+                &lt;td&gt;&quot; . $row[&#39;location&#39;] . &quot;<br/>
+                &lt;img src=&#39;../img/clear.jpg&#39; onclick=&#39;clearCallConfirm(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&lt;img src=&#39;../img/edit.png&#39; onclick=&#39;editCall(&quot; . $row[&#39;id&#39;] . &quot;)&#39;&gt;&lt;/td&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;clearCall&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $query = &quot;DELETE FROM mdt_calls WHERE id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_active_users SET callID=&#39;0&#39;, status=&#39;10&ndash;8&#39; WHERE callID=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;editCallGet&#39;) {<br/>
+$id = $_POST[&#39;id&#39;];<br/>
+$query = &quot;SELECT * FROM mdt_calls WHERE id=&#39;$id&#39;&quot;;<br/>
+<br/>
+$result = $conn&ndash;&gt;query($query);<br/>
+if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo json_encode(array($row[&#39;location&#39;], $row[&#39;details&#39;], $row[&#39;type&#39;]));<br/>
+        }<br/>
+    }    <br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;editCall&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $type = $_POST[&#39;type&#39;];<br/>
+    $location = $_POST[&#39;location&#39;];<br/>
+    $description = $_POST[&#39;description&#39;];<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_calls SET type=&#39;$type&#39;, location=&#39;$location&#39;, details=&#39;$description&#39; WHERE id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getUnits&#39;) {<br/>
+    echo &quot;<br/>
+            &lt;tr&gt;<br/>
+                &lt;th&gt;Unit #&lt;/th&gt;<br/>
+                &lt;th&gt;Type&lt;/th&gt;<br/>
+                &lt;th&gt;Status&lt;/th&gt;<br/>
+                &lt;th&gt;Call&lt;/th&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &quot;;<br/>
+<br/>
+    $query = &quot;SELECT * FROM mdt_active_users WHERE NOT department=&#39;Dispatch&#39; AND NOT logout=&#39;1&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo &quot;<br/>
+            &lt;tr&gt;<br/>
+                &lt;td&gt;&quot; . $row[&#39;identifier&#39;] . &quot;&lt;br&gt;&quot; . ownerName($row[&#39;user_id&#39;]) . &quot;&lt;/td&gt;<br/>
+                &lt;td&gt;&quot; . $row[&#39;department&#39;] . &quot; &ndash; &quot; . $row[&#39;divison&#39;] . &quot;&lt;/t&gt;<br/>
+                &lt;td&gt;<br/>
+                &lt;select id=&#39;&quot; . $row[&#39;user_id&#39;] . &quot;Status&#39; onchange=&#39;changeStatus(&quot; . $row[&#39;user_id&#39;] . &quot;, this.value)&#39;&gt;<br/>
+                    &lt;option&gt;10&ndash;6&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;7&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;8&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;15&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;23&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;97&lt;/option&gt;<br/>
+                    &lt;option&gt;10&ndash;42&lt;/option&gt;<br/>
+                &lt;/selcect&gt;<br/>
+                &lt;script&gt;$(&#39;#&quot; . $row[&#39;user_id&#39;] . &quot;Status&#39;).val(&#39;&quot; . $row[&#39;status&#39;] . &quot;&#39;);&lt;/script&gt;<br/>
+                &lt;/td&gt;<br/>
+                &lt;td&gt;<br/>
+                &lt;select id=&#39;&quot; . $row[&#39;user_id&#39;] . &quot;Call&#39; onchange=&#39;changeCall(&quot; . $row[&#39;user_id&#39;] . &quot;, this.value)&#39;&gt;<br/>
+                    &lt;option value=&#39;0&#39;&gt;None&lt;/option&gt;<br/>
+                    &quot; . getCallNames() . &quot;<br/>
+                &lt;/select&gt;<br/>
+                &lt;script&gt;$(&#39;#&quot; . $row[&#39;user_id&#39;] . &quot;Call&#39;).val(&#39;&quot; . $row[&#39;callID&#39;] . &quot;&#39;);&lt;/script&gt;<br/>
+                &lt;img src=&#39;../img/clear.jpg&#39; onclick=&quot; . &#39;&quot;&#39; . &quot;logoutUserConfirm(&quot; . $row[&#39;user_id&#39;] . &quot;,&#39;&quot; . $row[&#39;identifier&#39;] . &quot; &quot; . ownerName($row[&#39;user_id&#39;]) . &quot;&#39;)&quot; . &#39;&quot;&#39; . &quot;&gt;<br/>
+                &lt;/td&gt;<br/>
+            &lt;/tr&gt;<br/>
+        &quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+function getCallNames() {<br/>
+    include(&#39;../settings.php&#39;);<br/>
+    $query = &quot;SELECT * FROM mdt_calls&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    global $response;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $response .= &quot;&lt;option value=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;#&quot; . $row[&#39;id&#39;] . &quot; &ndash; &quot; . $row[&#39;type&#39;] . &quot;&lt;/option&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+    return $response;<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;changeStatus&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $status = $_POST[&#39;status&#39;];<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_active_users SET status=&#39;$status&#39; WHERE user_id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    <br/>
+    if ($status == &quot;10&ndash;8&quot;) {<br/>
+        $query = &quot;UPDATE mdt_active_users SET callID=&#39;0&#39; WHERE user_id=&#39;$id&#39;&quot;;<br/>
+        mysqli_query($conn, $query);<br/>
+        echo &#39;yo mama&#39;;<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;changeCall&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+    $call = $_POST[&#39;call&#39;];<br/>
+<br/>
+    $query = &quot;UPDATE mdt_active_users SET callID=&#39;$call&#39;, status=&#39;10&ndash;6&#39; WHERE user_id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;logoutUser&#39;) {<br/>
+    $id = $_POST[&#39;id&#39;];<br/>
+<br/>
+    $query = &quot;UPDATE mdt_active_users SET logout=&#39;1&#39; WHERE user_id=&#39;$id&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;signal&#39;) {<br/>
+    $server = $_SESSION[&#39;user_server&#39;];<br/>
+    if (sig100() == 0) {<br/>
+<br/>
+    $query = &quot;UPDATE mdt_server SET emergency=&#39;1&#39; WHERE id=&#39;$server&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    } else {<br/>
+        <br/>
+        $query = &quot;UPDATE mdt_server SET emergency=&#39;0&#39; WHERE id=&#39;$server&#39;&quot;;<br/>
+        mysqli_query($conn, $query);<br/>
+    }<br/>
+}<br/>
+<br/>
+function sig100() {<br/>
+    include(&#39;../settings.php&#39;);<br/>
+    $query = &quot;SELECT * FROM mdt_server&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            return $row[&#39;emergency&#39;];<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getSignal&#39;) {<br/>
+    echo sig100();<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;doesSteamExist&#39;) {<br/>
+    $steam = $_POST[&#39;steam&#39;];<br/>
+    echo &#39;yo mama&#39;;<br/>
+    <br/>
+    $query = &quot;SELECT * FROM mdt_users WHERE steam=&#39;$steam&#39;&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    if ($result&ndash;&gt;num_rows &gt; 1) {<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo $row[&#39;user_id&#39;];<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getServers&#39;) {<br/>
+    $query = &quot;SELECT id,ip,port FROM mdt_server&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo &quot;&lt;div style=&#39;display:none;&#39;&gt;&quot;;<br/>
+            $content = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/info.json&quot;), true);<br/>
+            echo &quot;&lt;/div&gt;&quot;;<br/>
+            echo &quot;&lt;div class=&#39;serverStatusBox&#39;&gt;&quot;;<br/>
+            echo &quot;&lt;div class=&#39;serverStatusTitle&#39;&gt;Server &quot; . $row[&#39;id&#39;] . &quot;&lt;/div&gt;&quot;;<br/>
+            echo &quot;&lt;div class=&#39;serverStatusStatus&#39; style=&#39;color: &quot;; if ($content) {echo &quot;green&quot;;} else {echo &quot;red&quot;;} echo &quot;;&#39;&gt;&quot;; if (!$content) {echo &quot;Offline&lt;/div&gt;&lt;/div&gt;&quot;; } elseif (!$content[&#39;vars&#39;][&#39;Uptime&#39;]) {echo &quot;Starting...&lt;/div&gt;&lt;/div&gt;&quot;;} else {echo &quot;Online&lt;/div&gt;&quot;;<br/>
+            $gta5_players = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/players.json&quot;), true);<br/>
+            echo &quot;&lt;div class=&#39;serverStatusInfo&#39;&gt;&quot; . count($gta5_players) . &quot;/&quot; . $content[&#39;vars&#39;][&#39;sv_maxClients&#39;] . &quot; Players&lt;/div&gt;&quot;;<br/>
+            echo &quot;&lt;div class=&#39;serverStatusInfo&#39;&gt;Uptime &quot; . $content[&#39;vars&#39;][&#39;Uptime&#39;] . &quot;&lt;/div&gt;&quot;;<br/>
+            echo &quot;&lt;button onclick=&#39;selectServer(&quot; . $row[&#39;id&#39;] . &quot;);&#39;&gt;View&lt;/button&gt;&quot;;<br/>
+            echo &quot;&lt;/div&gt;&quot;;}<br/>
+    }<br/>
+}<br/>
+}<br/>
+<br/>
+function getIPFromID($id,$conn) {<br/>
+    <br/>
+    $query = &quot;SELECT ip,port FROM mdt_server WHERE id=$id&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $ip = $row[&#39;ip&#39;];<br/>
+            $port = $row[&#39;port&#39;];<br/>
+            return array(&quot;ip&quot;=&gt;&quot;$ip&quot;,&quot;port&quot;=&gt;&quot;$port&quot;);<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getServerPlayerTable&#39;) {<br/>
+    $row = getIPFromID($_POST[&#39;id&#39;],$conn);<br/>
+    $sid = $_POST[&#39;id&#39;];<br/>
+    $json = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/players.json&quot;), true);<br/>
+    $n = &ndash;1;<br/>
+    echo &quot;&lt;tr&gt;&lt;th&gt;Id&lt;/th&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Options&lt;/th&gt;&quot;;<br/>
+    foreach($json as $a) {<br/>
+        $n = $n+1;<br/>
+        echo &quot;&lt;tr&gt;&lt;td&gt;&quot; . $json[$n][&#39;id&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&quot; . $json[$n][&#39;name&#39;] . &quot;&lt;/td&gt;&lt;td&gt;&lt;a onclick=&#39;kickConfirm($sid, &quot; . $json[$n][&#39;id&#39;] . &quot;)&#39;&gt;Kick&lt;/a&gt;&lt;a onclick=&#39;banConfirm($sid, &quot; . $json[$n][&#39;id&#39;] . &quot;)&#39;&gt;Ban&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&quot;;<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getServerInfo&#39;) {<br/>
+    $row = getIPFromID($_POST[&#39;id&#39;],$conn);<br/>
+    $content = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/info.json&quot;), true);<br/>
+    $gta5_players = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/players.json&quot;), true);<br/>
+    echo json_encode(array($content[&#39;vars&#39;][&#39;Uptime&#39;],count($gta5_players) . &quot;/&quot; . $content[&#39;vars&#39;][&#39;sv_maxClients&#39;]));<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;rcon&#39;) {<br/>
+    $fConn = getIPFromID($_POST[&#39;server&#39;],$conn);<br/>
+    $rcon = new q3query($fConn[&#39;ip&#39;], $fConn[&#39;port&#39;], $success);<br/>
+    $rcon&ndash;&gt;setRconpassword($rconPW);<br/>
+    $rcon&ndash;&gt;rcon($_POST[&#39;command&#39;]); <br/>
+    unset($rcon);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;genLogin&#39;) {<br/>
+    $str = rand();<br/>
+    $result = md5($str);<br/>
+    echo $result;  <br/>
+    <br/>
+    $query = &quot;INSERT INTO mdt_users (code) VALUES (&#39;$result&#39;)&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;removeLogin&#39;) {<br/>
+    $query = &quot;DELETE FROM mdt_users where code&lt;&gt;&#39;(NULL)&#39;&quot;;<br/>
+    mysqli_query($conn, $query);<br/>
+    echo mysqli_affected_rows($conn) . &quot; login codes deleted.&quot;;<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;getUsersTable&#39;) {<br/>
+    $query = &quot;SELECT name,email,suspend,user_id,admin FROM mdt_users&quot;;<br/>
+<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+    echo &quot;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Options&lt;/th&gt;&quot;;<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            echo &quot;&lt;tr&gt;&lt;td &quot;;<br/>
+            if ($row[&#39;admin&#39;] &gt; 0) {<br/>
+                echo &quot;style=&#39;color:red;&#39;&quot;;<br/>
+            }<br/>
+            echo &quot;&gt;&quot; . $row[&#39;name&#39;] .&quot;&lt;/td&gt;&lt;td&gt;&quot;;<br/>
+            if ($row[&#39;suspend&#39;] == 1) {<br/>
+                echo &quot;&lt;a onclick=&#39;userSuspend(&quot; . $row[&#39;user_id&#39;] . &quot;,0)&#39;&gt;Unsuspend&lt;/a&gt;&quot;;<br/>
+            } else {<br/>
+                echo &quot;&lt;a onclick=&#39;userSuspendConfirm(&quot; . $row[&#39;user_id&#39;] . &quot;)&#39;&gt;Suspend&lt;/a&gt;&quot;;<br/>
+            }<br/>
+            echo &quot;&lt;a href=&#39;mailto: &quot; . $row[&#39;email&#39;] . &quot;&#39; target=&#39;_blank&#39;&gt;Email&lt;/a&gt;&lt;/td&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+}<br/>
+<br/>
+if ($_POST[&#39;function&#39;] == &#39;userSuspend&#39;) {<br/>
+    <br/>
+    $query = &quot;UPDATE mdt_users SET suspend=&#39;&quot; . $_POST[&#39;suspend&#39;] .&quot;&#39; WHERE user_id=&#39;&quot; . $_POST[&#39;id&#39;] .&quot;&#39;&quot;;<br/>
+<br/>
+    mysqli_query($conn, $query);<br/>
+}</body></html>

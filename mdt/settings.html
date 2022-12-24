@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+//MySQL Database<br/>
+$servername = &quot;&quot;; //URL to MySQL server. If running locally use localhost<br/>
+$username = &quot;&quot;; //Username used to login to server<br/>
+$password = &quot;&quot;; //Password used to login to server<br/>
+$dbname = &quot;&quot;; //Name of the database with the provided SQL files<br/>
+<br/>
+//Steam API key<br/>
+//Get a Steam API key from https://steamcommunity.com/dev/apikey and enter it here. Don&#39;t know why I added this, may get removed in next version.<br/>
+$SteamAPI_KEY = &quot;&quot;;<br/>
+<br/>
+//FiveM Server<br/>
+//Enter FiveM server rcon password. If you are running multiple servers they all must have the same rcon password.<br/>
+$rconPW = &quot;Jeff&quot;;<br/>
+<br/>
+//Website Url<br/>
+$defaultURL = &quot;//bennyfaelz.com/mdt&quot;; //Url to where the MDT pages can be found. MUST INCLUDE &quot;//&quot; BEFORE URL ex: //test.com/mdt<br/>
+<br/>
+//Top bar title<br/>
+$topTitle = &quot;MDT&quot;;<br/>
+<br/>
+//Enable Account Code.<br/>
+//When enabled account creation requires a code given by an admin to work. Best for private communities.<br/>
+//true = enable, false = disabled<br/>
+$enableCode = false;<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+//DON&#39;T TOUCH<br/>
+$conn = mysqli_connect($servername, $username, $password, $dbname);<br/>
+?&gt;</body></html>

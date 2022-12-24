@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+$api_key = &quot;5983858A0DEB07846F46D2D2386E89BA&quot;;<br/>
+<br/>
+//Including Database configuration file.<br/>
+ <br/>
+include(&#39;settings.php&#39;);<br/>
+session_start();<br/>
+ <br/>
+//Getting value of &quot;search&quot; variable from &quot;script.js&quot;.<br/>
+ <br/>
+if (isset($_POST[&#39;code&#39;])) {<br/>
+ <br/>
+//Search box value assigning to $Name variable.<br/>
+ <br/>
+   $Name = $_POST[&#39;code&#39;];<br/>
+   $id = $_SESSION[&#39;user_id&#39;];<br/>
+ <br/>
+//Search query.<br/>
+ <br/>
+   $Query = &quot;SELECT * FROM mdt_players WHERE code=&#39;$Name&#39;&quot;;<br/>
+ <br/>
+//Query execution<br/>
+ <br/>
+   $ExecQuery = MySQLi_query($conn, $Query);<br/>
+ <br/>
+//Creating unordered list to display result.<br/>
+   echo &#39;&#39;;<br/>
+   //Fetching result from database.<br/>
+ <br/>
+   while ($Result = MySQLi_fetch_array($ExecQuery)) {<br/>
+<br/>
+echo steamInfo($Result[&quot;steam&quot;],$id);<br/>
+ <br/>
+}}<br/>
+<br/>
+function steamInfo($SteamID, $UserID) {<br/>
+        $SteamAPI_KEY = &quot;5983858A0DEB07846F46D2D2386E89BA&quot;;<br/>
+        //$SteamID = &quot;76561198164179083&quot;;<br/>
+&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;$Name = &quot;Player Name&quot;;<br/>
+&nbsp;&nbsp;&nbsp;$Avatar  = &#39;img/noavatar.jpg&#39;;<br/>
+&nbsp;&nbsp;&nbsp;/*<br/>
+&nbsp;&nbsp;&nbsp;if (isset($_GET[&#39;steamid&#39;])) <br/>
+&nbsp;&nbsp;&nbsp;{<br/>
+            */<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SteamAPI = &#39;http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=&#39; . $SteamAPI_KEY . &#39;&amp;steamids=&#39; . $SteamID;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SteamAPI_Returned = file_get_contents($SteamAPI);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$steamAPI = json_decode($SteamAPI_Returned, true);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (isset($steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;personaname&#39;]))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$Name = $steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;personaname&#39;];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (isset($steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;avatarfull&#39;]))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$Avatar = $steamAPI[&#39;response&#39;][&#39;players&#39;][0][&#39;avatarfull&#39;];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+                //add steam id to database<br/>
+include(&#39;settings.php&#39;); <br/>
+                // Create connection<br/>
+$conn = new mysqli($servername, $username, $password, $dbname);<br/>
+// Check connection<br/>
+if ($conn&ndash;&gt;connect_error) {<br/>
+    die(&quot;Connection failed: &quot; . $conn&ndash;&gt;connect_error);<br/>
+} <br/>
+<br/>
+$sql = &quot;UPDATE mdt_users SET steam=&#39;$SteamID&#39; WHERE user_id=&#39;$UserID&#39;&quot;;<br/>
+<br/>
+if ($conn&ndash;&gt;query($sql) === TRUE) {<br/>
+    //echo &quot;Record updated successfully $sql&quot;;<br/>
+} else {<br/>
+    //echo &quot;$SteamID Error updating record: &quot; . $conn&ndash;&gt;error;<br/>
+}<br/>
+<br/>
+$conn&ndash;&gt;close();<br/>
+<br/>
+                return &#39;Success,&#39; .$Name . &#39;,&#39; . $Avatar;<br/>
+}<br/>
+?&gt;</body></html>

@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+<br/>
+/* q3query.class.php &ndash; Quake 3 query class<br/>
+ *<br/>
+ * Copyright (C) 2009 Manuel Kress<br/>
+ * Author(s): Manuel Kress (manuel.strider@web.de)<br/>
+ *<br/>
+ * This program is free software; you can redistribute it and/or modify it under<br/>
+ * the terms of the GNU General Public License as published by the Free Software<br/>
+ * Foundation; either version 3 of the License, or (at your option) any later<br/>
+ * version.<br/>
+ *<br/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT<br/>
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS<br/>
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more<br/>
+ * details.<br/>
+ * <br/>
+ * You should have received a copy of the GNU General Public License along with<br/>
+ * this program; if not, see &lt;http://www.gnu.org/licenses/&gt;.<br/>
+ *<br/>
+ */<br/>
+<br/>
+<br/>
+class q3query {<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;private $address;<br/>
+&nbsp;&nbsp;&nbsp;private $port;<br/>
+    private $rconpassword = false;<br/>
+    private $fp;<br/>
+    private $lastPing = false;<br/>
+<br/>
+    public function __construct($address, $port, &amp;$success = NULL, &amp;$errno = NULL, &amp;$errstr = NULL) {<br/>
+    	$this&ndash;&gt;address = $address;<br/>
+    	$this&ndash;&gt;port = $port;<br/>
+<br/>
+        $this&ndash;&gt;fp = fsockopen(&quot;udp://$address&quot;, $port, $errno, $errstr, 5);<br/>
+        if (!$this&ndash;&gt;fp) {<br/>
+        	$success = false;<br/>
+        }<br/>
+        else {<br/>
+        	$success = true;<br/>
+        }<br/>
+    }<br/>
+<br/>
+    public function setRconpassword($pw) {<br/>
+        $this&ndash;&gt;rconpassword = $pw;<br/>
+    }<br/>
+<br/>
+    public function rcon($str) {<br/>
+    	if (!$this&ndash;&gt;rconpassword) {<br/>
+    		return false;<br/>
+    	}<br/>
+    	$this&ndash;&gt;send(&quot;rcon &quot; . $this&ndash;&gt;rconpassword . &quot; $str&quot;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return $this&ndash;&gt;getResponse();<br/>
+    }<br/>
+<br/>
+    private function send($str) {<br/>
+        fwrite($this&ndash;&gt;fp, &quot;\xFF\xFF\xFF\xFF$str\x00&quot;);<br/>
+    }<br/>
+<br/>
+    private function getResponse() {<br/>
+    	stream_set_timeout($this&ndash;&gt;fp, 0, 7e5);<br/>
+        $s = &#39;&#39;;<br/>
+&nbsp;&nbsp;&nbsp;    $start = microtime(true);<br/>
+        do {<br/>
+        	$read = fread($this&ndash;&gt;fp, 9999);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$s .= substr($read, strpos($read, &quot;\n&quot;) + 1);<br/>
+    		if (!isset($end)) {<br/>
+    			$end = microtime(true);<br/>
+    		}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$info = stream_get_meta_data($this&ndash;&gt;fp);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (!$info[&quot;timed_out&quot;]);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$this&ndash;&gt;lastPing = round(($end &ndash; $start) * 1000);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+        return $s;<br/>
+    }<br/>
+<br/>
+    public function quit() {<br/>
+    	if (is_resource($this&ndash;&gt;fp)) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fclose($this&ndash;&gt;fp);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true;<br/>
+    	}<br/>
+    	return false;<br/>
+    }<br/>
+<br/>
+    public function reconnect() {<br/>
+    	$this&ndash;&gt;quit();<br/>
+    	$this&ndash;&gt;__construct($this&ndash;&gt;address, $this&ndash;&gt;port);<br/>
+    }<br/>
+<br/>
+    public function getGameStatus() {<br/>
+        $this&ndash;&gt;send(&quot;getstatus&quot;);<br/>
+        $response = $this&ndash;&gt;getResponse();<br/>
+<br/>
+        list($dvarslist, $playerlist) = explode(&quot;\n&quot;, $response, 2);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$dvarslist = explode(&quot;\\&quot;, $dvarslist);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$dvars = array();<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ($i = 1; $i &lt; count($dvarslist); $i += 2) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$dvars[$dvarslist[$i]] = $dvarslist[$i + 1];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$playerlist = explode(&quot;\n&quot;, $playerlist);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array_pop($playerlist);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$players = array();<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;foreach ($playerlist as $value) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list($score, $ping, $name) = explode(&quot; &quot;, $value, 3);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$players[] = array(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;name&quot; =&gt;substr($name, 1, &ndash;1),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;score&quot; =&gt; $score,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ping&quot; =&gt; $ping<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return array($dvars, $players);<br/>
+    }<br/>
+<br/>
+    public function getGameInfo() {<br/>
+        $this&ndash;&gt;send(&quot;getinfo&quot;);<br/>
+        $response = $this&ndash;&gt;getResponse();<br/>
+<br/>
+        $dvarslist = explode(&quot;\\&quot;, $response);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$dvars = array();<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for ($i = 1; $i &lt; count($dvarslist); $i += 2) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$dvars[$dvarslist[$i]] = $dvarslist[$i + 1];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return $dvars;<br/>
+    }<br/>
+<br/>
+    public function getLastPing() {<br/>
+        return $this&ndash;&gt;lastPing;<br/>
+    }<br/>
+}<br/>
+<br/>
+?&gt;</body></html>

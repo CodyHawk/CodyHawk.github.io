@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php include(&#39;settings.php&#39;); <br/>
+session_start();<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;head&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;modal.css&quot;&gt;<br/>
+&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;script src=&quot;&lt;?php echo $defaultURL;?&gt;/utilities/console.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;title&gt;Login&lt;/title&gt;<br/>
+&lt;/head&gt;<br/>
+&lt;body&gt;<br/>
+    &lt;div id=&quot;linkModal&quot; class=&quot;modal&quot;&gt;<br/>
+        &lt;center&gt;<br/>
+      &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+<br/>
+        &lt;?php include(&#39;link.php&#39;); ?&gt;<br/>
+  &lt;/div&gt;<br/>
+        &lt;/center&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;div class=&quot;form&ndash;wrapper&quot;&gt;<br/>
+  &lt;form id=&quot;form&quot; method=&quot;post&quot; action=&quot;utilities/login.php&quot;&gt;<br/>
+    &lt;h3&gt;Login&lt;/h3&gt;<br/>
+&nbsp;&nbsp;&nbsp;<br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input type=&quot;text&quot; name=&quot;email&quot; required=&quot;required&quot; placeholder=&quot;Email&quot; autofocus required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;input type=&quot;password&quot; name=&quot;pass&quot; required=&quot;required&quot; placeholder=&quot;Password&quot; required&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;form&ndash;item&quot;&gt;<br/>
+        &lt;select id=&quot;server&quot; name=&quot;server&quot;&gt;<br/>
+            &lt;option hidden&gt;Server&lt;/option&gt;<br/>
+            &lt;?php<br/>
+   $query = &quot;SELECT id,ip,port FROM mdt_server&quot;;<br/>
+    <br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $content = json_decode(file_get_contents(&quot;http://&quot; . $row[&#39;ip&#39;] . &quot;:&quot; . $row[&#39;port&#39;] . &quot;/info.json&quot;), true);<br/>
+            if ($content) {echo &quot;&lt;option value=&#39;&quot; . $row[&#39;id&#39;] . &quot;&#39;&gt;&quot; . $row[&quot;id&quot;] . &quot;&lt;/option&gt;&quot;;}<br/>
+        }<br/>
+        }<br/>
+$conn&ndash;&gt;close();<br/>
+            ?&gt;<br/>
+        &lt;/select&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;div class=&quot;button&ndash;panel&quot;&gt;<br/>
+        &lt;input type=&quot;submit&quot; class=&quot;button&quot; id=&quot;sub&quot; title=&quot;Log In&quot; name=&quot;login&quot; value=&quot;Login&quot;&gt;&lt;/input&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;center&gt;&lt;alert&gt;&lt;?php  if(isset($_SESSION[&#39;loginError&#39;])) {echo $_SESSION[&#39;loginError&#39;]; unset($_SESSION[&#39;loginError&#39;]);}?&gt;&lt;/alert&gt;&lt;/center&gt;<br/>
+    &lt;center&gt;&lt;a href=&#39;create.php&#39;&gt;&lt;h2&gt;Create Account&lt;/h2&gt;&lt;/a&gt;&lt;/center&gt;<br/>
+  &lt;/form&gt;<br/>
+    &lt;script&gt;<br/>
+        $(document).ready(function () {<br/>
+            window.addEventListener(&#39;message&#39;, function (event) {<br/>
+                var item = event.data;<br/>
+                if (item.jo) {<br/>
+                    alert(&#39;jo&#39;);<br/>
+                    console.log(&#39;mama&#39;);<br/>
+                }<br/>
+                });<br/>
+        });<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+    // Get the modal<br/>
+var link = document.getElementById(&#39;linkModal&#39;);<br/>
+<br/>
+// Get the button that opens the modal<br/>
+var btn = document.getElementById(&quot;myBtn&quot;);<br/>
+<br/>
+// Get the &lt;span&gt; element that closes the modal<br/>
+var span = document.getElementsByClassName(&quot;close&quot;)[0];<br/>
+<br/>
+//get url<br/>
+<br/>
+var url_string = window.location.href;<br/>
+var url = new URL(url_string);<br/>
+var linkUrl = url.searchParams.get(&quot;link&quot;);<br/>
+var id = url.searchParams.get(&quot;id&quot;);<br/>
+<br/>
+//When #link open modal<br/>
+if (linkUrl === &quot;1&quot;) {<br/>
+link.style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+// When the user clicks anywhere outside of the modal, close it<br/>
+window.onclick = function(event) {<br/>
+  if (event.target == link) {<br/>
+    link.style.display = &quot;none&quot;;<br/>
+  }<br/>
+}<br/>
+    &lt;/script&gt;<br/>
+&lt;/div&gt;<br/>
+&lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

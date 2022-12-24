@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php <br/>
+include(&#39;dbcon.php&#39;);<br/>
+include(&#39;session.php&#39;); <br/>
+<br/>
+$result=mysqli_query($con, &quot;select * from users where user_id=&#39;$session_id&#39;&quot;)or die(&#39;Error In Session&#39;);<br/>
+$row=mysqli_fetch_array($result);<br/>
+<br/>
+ ?&gt;<br/>
+<br/>
+&lt;html&gt;<br/>
+&lt;head&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;/head&gt;<br/>
+&lt;style&gt;<br/>
+* {<br/>
+    box&ndash;sizing: border&ndash;box;<br/>
+}<br/>
+<br/>
+A {<br/>
+    text&ndash;decoration: none;<br/>
+}<br/>
+<br/>
+.departmenmts {<br/>
+postion:relative;<br/>
+float:left;<br/>
+margin: 25px;<br/>
+margin&ndash;top: 0px;<br/>
+}<br/>
+<br/>
+/* Clearfix (clear floats) */<br/>
+.row {<br/>
+    content: &quot;&quot;;<br/>
+    position: relative;<br/>
+}<br/>
+<br/>
+up{<br/>
+  font&ndash;size: 25px;<br/>
+  font&ndash;weight: 640;<br/>
+  color: #e7e7e7;<br/>
+  font&ndash;family:&#39;sans&ndash;serif&#39;,&#39;helvetica&#39;;<br/>
+  margin: 10px;<br/>
+  margin&ndash;top: 0px;<br/>
+}<br/>
+&lt;/style&gt;<br/>
+&lt;body&gt;<br/>
+&lt;div class=&quot;welcome&ndash;wrapper&quot;&gt; <br/>
+    &lt;center&gt;&lt;h3&gt;Welcome: &lt;?php echo $row[&#39;name&#39;]; ?&gt; &lt;/h3&gt;&lt;/center&gt;<br/>
+        &lt;center&gt;&lt;up&gt;Please select a department&lt;/up&gt;&lt;/center&gt;<br/>
+&nbsp;&nbsp;&nbsp; &lt;div class=&quot;reminder&quot;&gt;<br/>
+    &lt;p&gt;&lt;a href=&quot;logout.php&quot;&gt;Log out&lt;/a&gt;&lt;/p&gt;<br/>
+  &lt;/div&gt;<br/>
+        &lt;center&gt;&lt;div style=&#39;postion:relative; display: inline&ndash;block;&#39;&gt;<br/>
+            &lt;div class=&#39;departmenmts&#39;&gt;<br/>
+      &lt;a href=&quot;departments/civ/civ&ndash;list.php&quot;&gt;<br/>
+          &lt;p&gt;&lt;img src=&quot;img/civIcon.png&quot; height=&quot;150&quot; width=&quot;150&quot; alt=&quot;Dispatch&quot;&gt;&lt;/p&gt;<br/>
+          &lt;p&gt;&lt;up&gt;Civilian&lt;/up&gt;&lt;/p&gt;<br/>
+      &lt;/a&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div class=&#39;departmenmts&#39;&gt;<br/>
+      &lt;a href=&quot;department/leo.php&quot;&gt;<br/>
+          &lt;p&gt;&lt;img src=&quot;img/temp.png&quot; height=&quot;150&quot; width=&quot;150&quot; alt=&quot;Dispatch&quot;&gt;&lt;/p&gt;<br/>
+          &lt;p&gt;&lt;up&gt;Law Enforcement&lt;/up&gt;&lt;/p&gt;<br/>
+      &lt;/a&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div class=&#39;departmenmts&#39;&gt;<br/>
+      &lt;a href=&quot;department/Dispatch.php&quot;&gt;<br/>
+          &lt;p&gt;&lt;img src=&quot;img/dispatchIcon.png&quot; height=&quot;150&quot; width=&quot;150&quot; alt=&quot;Dispatch&quot;&gt;&lt;/p&gt;<br/>
+          &lt;p&gt;&lt;up&gt;Dispatch&lt;/up&gt;&lt;/p&gt;<br/>
+      &lt;/a&gt;<br/>
+            &lt;/div&gt;<br/>
+        &lt;/div&gt;&lt;/center&gt;<br/>
+  &lt;/div&gt;        <br/>
+<br/>
+  <br/>
+<br/>
+&lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

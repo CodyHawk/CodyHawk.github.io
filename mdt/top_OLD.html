@@ -1,0 +1,226 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php <br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/settings.php&#39;);<br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/dbcon.php&#39;);<br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/session.php&#39;);<br/>
+<br/>
+$result=mysqli_query($con, &quot;select * from users where user_id=&#39;$session_id&#39;&quot;)or die(&#39;Error In Session&#39;);<br/>
+$row=mysqli_fetch_array($result);<br/>
+/*<br/>
+ * <br/>
+ * <br/>
+ * <br/>
+if(<br/>
+ *<br/>
+ * <br/>
+ * <br/>
+ *  empty( $_SERVER[&#39;HTTP_X_REQUESTED_WITH&#39;] ) &amp;&amp;<br/>
+str<br/>
+ * tolower( $_SERVER[&#39;HTTP_X_REQUESTED_WITH&#39;] ) != &quot;xmlhttprequest&quot;){<br/>
+   <br/>
+<br/>
+ * <br/>
+ * <br/>
+ * <br/>
+ * <br/>
+ *  die(&quot;ERROR.... Your not supposed to be here.&quot;);<br/>
+}<br/>
+ */<br/>
+?&gt;<br/>
+&lt;head&gt;<br/>
+    &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+    &lt;script type=&quot;text/javascript&quot; src=&quot;aop.js&quot;&gt;&lt;/script&gt;<br/>
+&lt;/head&gt;<br/>
+&lt;style&gt;<br/>
+    #top {<br/>
+        display: table;<br/>
+        background&ndash;color: #343434;<br/>
+        position: fixed;<br/>
+        width: 100%;<br/>
+        height: 7%;<br/>
+        top:0;<br/>
+        left:0;<br/>
+    }<br/>
+<br/>
+    t {<br/>
+        font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+        color: white;<br/>
+        font&ndash;size: 1.5em;<br/>
+    }<br/>
+<br/>
+    #top select {<br/>
+        font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+        color: white;<br/>
+        font&ndash;size:  1.5em;<br/>
+        background: none;<br/>
+        background&ndash;color: #343434;<br/>
+        border: none;<br/>
+        position: absolute;<br/>
+        margin&ndash;left: 5px;<br/>
+    }<br/>
+<br/>
+    #top select:focus {<br/>
+        outline: none !important;<br/>
+        border: none !important;<br/>
+    }<br/>
+<br/>
+    .server {<br/>
+        display: table&ndash;cell;<br/>
+        vertical&ndash;align: middle;<br/>
+        padding&ndash;left: 30px;<br/>
+        position: relative;<br/>
+    }<br/>
+<br/>
+    #clockDiv {<br/>
+        margin: 0;<br/>
+        position: absolute;<br/>
+        top: 50%;<br/>
+        left: 25%;<br/>
+        transform: translate(&ndash;50%, &ndash;50%);<br/>
+    }<br/>
+<br/>
+    #userNameDiv {<br/>
+        margin: 0;<br/>
+        position: absolute;<br/>
+        top: 50%;<br/>
+        left: 50%;<br/>
+        transform: translate(&ndash;50%, &ndash;50%);<br/>
+        font&ndash;size:  1.5em;<br/>
+        font&ndash;weight: 200;<br/>
+    }<br/>
+<br/>
+    #aopDiv {<br/>
+        margin: 0;<br/>
+        position: absolute;<br/>
+        top: 50%;<br/>
+        left: 75%;<br/>
+        transform: translate(&ndash;50%, &ndash;50%);<br/>
+        display: inline&ndash;block;<br/>
+    }<br/>
+<br/>
+    #aop {<br/>
+        display: inline&ndash;block;<br/>
+        text&ndash;align: right;<br/>
+        float: right;<br/>
+    }<br/>
+    <br/>
+    #logoutDiv {<br/>
+        margin: 0;<br/>
+        position: absolute;<br/>
+        top: 50%;<br/>
+        left: 98%;<br/>
+        transform: translate(&ndash;50%, &ndash;50%);<br/>
+    }<br/>
+<br/>
+&lt;/style&gt;<br/>
+<br/>
+&lt;div class=&quot;server&quot;&gt;<br/>
+            &lt;t&gt;&lt;?php echo $topTitle?&gt; &ndash; Server &lt;?php echo $serverNumber ?&gt;&lt;/t&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div id=&quot;clockDiv&quot;&gt;<br/>
+                &lt;t id=&quot;clock&quot;&gt;&lt;/t&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div id=&quot;userNameDiv&quot;&gt;<br/>
+                &lt;t id=&quot;userName&quot;&gt;&lt;?php echo $row[&#39;name&#39;];?&gt;&lt;/t&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div id=&quot;aopDiv&quot;&gt;<br/>
+                &lt;t style=&quot;float: left; clear: left; width: 100%;&quot;&gt;AOP:&lt;/t&gt;<br/>
+                &lt;select id=&quot;aop&quot;&gt;<br/>
+                &lt;/select&gt;<br/>
+            &lt;/div&gt;<br/>
+            &lt;div id=&quot;logoutDiv&quot;&gt;<br/>
+                &lt;a href=&quot;../../logout.php&quot; &gt;&lt;img src=&quot;../../img/logout.png&quot; alt=&quot;Smiley face&quot; style=&quot;position: relative&quot; height=&quot;30&quot; width=&quot;30&quot;&gt;&lt;/a&gt;<br/>
+            &lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;check&quot; style=&quot;display: none;&quot;&gt;&lt;/div&gt;<br/>
+            &lt;script&gt;<br/>
+    function currentTime() {<br/>
+  var date = new Date(); /* creating object of Date class */<br/>
+  var hour = date.getHours();<br/>
+  var min = date.getMinutes();<br/>
+  var sec = date.getSeconds();<br/>
+  hour = updateTime(hour);<br/>
+  min = updateTime(min);<br/>
+  sec = updateTime(sec);<br/>
+  document.getElementById(&quot;clock&quot;).innerText = hour + &quot; : &quot; + min + &quot; : &quot; + sec; /* adding time to the div */<br/>
+    var t = setTimeout(function(){ currentTime() }, 1000); /* setting timer */<br/>
+}<br/>
+<br/>
+function updateTime(k) {<br/>
+  if (k &lt; 10) {<br/>
+    return &quot;0&quot; + k;<br/>
+  }<br/>
+  else {<br/>
+    return k;<br/>
+  }<br/>
+}<br/>
+<br/>
+currentTime(); /* calling currentTime() function to initiate the process */<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+        loadXMLDoc();<br/>
+        setInterval(function(){loadXMLDoc();}, 3000);<br/>
+function loadXMLDoc() {<br/>
+  var xmlhttp = new XMLHttpRequest();<br/>
+  xmlhttp.onreadystatechange = function() {<br/>
+    if (this.readyState == 4 &amp;&amp; this.status == 200) {<br/>
+      myFunction(this);<br/>
+    }<br/>
+  };<br/>
+  xmlhttp.open(&quot;GET&quot;, &quot;aop.xml&quot; , true);<br/>
+  xmlhttp.send();<br/>
+}<br/>
+<br/>
+function myFunction(xml) {<br/>
+  var x, i, xmlDoc, table;<br/>
+  xmlDoc = xml.responseXML;<br/>
+  //table = &quot;&lt;tr&gt;&lt;th&gt;Artist&lt;/th&gt;&lt;th&gt;Title&lt;/th&gt;&lt;/tr&gt;&quot;;<br/>
+  x = xmlDoc.getElementsByTagName(&quot;AREA&quot;)<br/>
+  for (i = 0; i &lt; x.length; i++) {<br/>
+      aopCheck(x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue, document.getElementById(&quot;server&quot;).options[document.getElementById(&quot;server&quot;).selectedIndex].value);<br/>
+      //console.log(document.getElementById(&quot;aop&quot;).options[document.getElementById(&quot;aop&quot;).selectedIndex].value);<br/>
+      var e = document.getElementById(&quot;aop&quot;).options;<br/>
+      if (typeof(e) != &#39;undefined&#39; &amp;&amp; e != null)<br/>
+{<br/>
+  // exists.<br/>
+          if (document.getElementById(&quot;aop&quot;).options[document.getElementById(&quot;aop&quot;).selectedIndex].value === document.getElementById(&quot;check&quot;).value) {<br/>
+    } else {<br/>
+    table += &quot;&lt;option value=&#39;&quot; + <br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&#39; name=&#39;&quot; + <br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&#39;&gt;&quot; +<br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&lt;/option&gt;&quot;;<br/>
+  }<br/>
+  } else {<br/>
+          table += &quot;&lt;option value=&#39;&quot; + <br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&#39; name=&#39;&quot; + <br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&#39;&gt;&quot; +<br/>
+    x[i].getElementsByTagName(&quot;NAME&quot;)[0].childNodes[0].nodeValue +<br/>
+    &quot;&lt;/option&gt;&quot;;<br/>
+  }<br/>
+  }<br/>
+  document.getElementById(&quot;aop&quot;).innerHTML = table;<br/>
+}<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    console.log(document.getElementById(&quot;server&quot;).options[document.getElementById(&quot;server&quot;).selectedIndex].value);<br/>
+    <br/>
+    <br/>
+             $(document).on(&#39;change&#39;,&#39;#server&#39;,function(){<br/>
+               //$(&#39;#serverForm&#39;).submit();<br/>
+          });<br/>
+          <br/>
+          function change() {<br/>
+              $(&#39;#serverForm&#39;).submit();<br/>
+          };<br/>
+    &lt;/script&gt;</body></html>

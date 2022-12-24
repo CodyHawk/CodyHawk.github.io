@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php <br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/settings.php&#39;);<br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/dbcon.php&#39;);<br/>
+include($_SERVER[&#39;DOCUMENT_ROOT&#39;].&#39;/mdt/session.php&#39;);<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+    &lt;head&gt;<br/>
+        &lt;meta charset=&quot;UTF&ndash;8&quot;&gt;<br/>
+        &lt;title&gt;Civilian Selection&lt;/title&gt;<br/>
+        &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;modal.css&quot;&gt;<br/>
+        &lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:500&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+        &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+        &lt;script type=&quot;text/javascript&quot; src=&quot;aop.js&quot;&gt;&lt;/script&gt;<br/>
+        <br/>
+                &lt;link rel=&quot;stylesheet/less&quot; type=&quot;text/css&quot; href=&quot;styles.less&quot; /&gt;<br/>
+        &lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/less.js/3.9.0/less.min.js&quot; &gt;&lt;/script&gt;<br/>
+        &lt;script&gt;<br/>
+$(document).ready(function() {<br/>
+            $(&quot;#top&quot;).load(&quot;top.php&quot;);<br/>
+                });<br/>
+            &lt;/script&gt;<br/>
+    &lt;/head&gt;<br/>
+    &lt;body&gt;<br/>
+        &lt;!&ndash;&ndash; Top panel &ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;top&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        <br/>
+        &lt;!&ndash;&ndash; List &ndash;&ndash;&gt;<br/>
+        &lt;div id=&quot;list&quot;&gt;<br/>
+                &lt;table class=&quot;fixed_headers&quot;&gt;<br/>
+            &lt;thead&gt;<br/>
+        &lt;tr&gt;<br/>
+    &lt;th&gt;List of Characters&lt;/th&gt;<br/>
+        &lt;/tr&gt;<br/>
+        &lt;tr&gt;<br/>
+    &lt;th&gt;&lt;a onclick=&quot;add.style.display = &#39;block&#39;;&quot;  style=&quot;cursor: pointer; cursor: hand;&quot;&gt;Add New Character&lt;/a&gt;&lt;/th&gt;<br/>
+        &lt;/tr&gt;<br/>
+        &lt;/thead&gt;<br/>
+        &lt;tbody&gt;<br/>
+        &lt;?php<br/>
+        // Create connection<br/>
+$conn = new mysqli($servername, $username, $password, $dbname);<br/>
+// Check connection<br/>
+if ($conn&ndash;&gt;connect_error) {<br/>
+    die(&quot;Connection failed: &quot; . $conn&ndash;&gt;connect_error);<br/>
+} <br/>
+<br/>
+$sql = &quot;SELECT first, last, id FROM characters WHERE ownerID=&#39;$session_id&#39;&quot;;<br/>
+$result = $conn&ndash;&gt;query($sql);<br/>
+<br/>
+if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+    // output data of each row<br/>
+    while($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        echo &quot;&lt;tr&gt;&lt;td&gt;&lt;a href=&#39;civ#&quot; . $row[&quot;id&quot;] . &quot;.php&#39;&gt;&quot; . $row[&quot;first&quot;]. &quot; &quot; . $row[&quot;last&quot;] . &quot;&lt;/a&gt;&lt;/tr&gt;&lt;/td&gt;&quot;;<br/>
+    }<br/>
+} else {<br/>
+    echo &quot;&lt;tr&gt;&lt;td style=&#39;color:black;&#39;&gt;No Results&lt;/tr&gt;&lt;/td&gt;&quot;;<br/>
+}<br/>
+$conn&ndash;&gt;close();<br/>
+?&gt;<br/>
+            &lt;/tbody&gt;<br/>
+  &lt;/table&gt;<br/>
+    &lt;/div&gt;<br/>
+        <br/>
+            &lt;div id=&quot;addModal&quot; class=&quot;modal&quot;&gt;<br/>
+        &lt;center&gt;<br/>
+      &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+    &lt;span class=&quot;close&quot;&gt;&amp;times;&lt;/span&gt;<br/>
+            &lt;style&gt;<br/>
+                    #addDiv label {<br/>
+                font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+                font&ndash;size: 2em;<br/>
+                color: black;<br/>
+                text&ndash;align: left;<br/>
+                position: relative;<br/>
+                float: left;<br/>
+            }<br/>
+            <br/>
+            input {<br/>
+                margin&ndash;bottom: 10px;<br/>
+            }<br/>
+            #addDiv input[type=text], #addDiv select, #addDiv input[type=date] {<br/>
+                width: 100%;<br/>
+                padding: 12px 20px;<br/>
+                margin: 8px 0;<br/>
+                display: inline&ndash;block;<br/>
+                border: 1px solid #ccc;<br/>
+                border&ndash;radius: 4px;<br/>
+                box&ndash;sizing: border&ndash;box;<br/>
+            }<br/>
+            <br/>
+           #addDiv input[type=submit] {<br/>
+                font&ndash;family: &#39;Roboto&#39;, sans&ndash;serif;<br/>
+                width: 100%;<br/>
+                background&ndash;color: #333;<br/>
+                color: white;<br/>
+                padding: 14px 20px;<br/>
+                margin: 8px 0;<br/>
+                border: none;<br/>
+                border&ndash;radius: 4px;<br/>
+                cursor: pointer;<br/>
+            }<br/>
+    &lt;/style&gt;<br/>
+<br/>
+        &lt;div id=&#39;addDiv&#39;&gt;<br/>
+        &lt;form id=&#39;addForm&#39; action=&quot;#&quot; method=&quot;post&quot;&gt;<br/>
+            &lt;label for=&quot;first&quot; &gt;First Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; name=&quot;first&quot; required&gt;<br/>
+<br/>
+            &lt;label for=&quot;last&quot; &gt;Last Name&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; name=&quot;last&quot; required&gt;<br/>
+<br/>
+            &lt;label for=&quot;dob&quot;&gt;Date of Birth&lt;/label&gt;<br/>
+            &lt;input type=&quot;date&quot; name=&quot;dob&quot; required&gt;<br/>
+<br/>
+            &lt;label for=&quot;gender&quot;&gt;Gender&lt;/label&gt;<br/>
+            &lt;select name=&quot;gender&quot; required&gt;<br/>
+                &lt;option value=&quot;Male&quot;&gt;Male&lt;/option&gt;<br/>
+                &lt;option value=&quot;Female&quot;&gt;Female&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+<br/>
+            &lt;label for=&quot;address&quot;&gt;Address&lt;/label&gt;<br/>
+            &lt;input type=&quot;text&quot; name=&quot;address&quot;&gt;<br/>
+<br/>
+            &lt;label for=&quot;lic&quot;&gt;Driver&#39;s License&lt;/label&gt;<br/>
+            &lt;select name=&quot;lic&quot; required&gt;<br/>
+                &lt;option value=&quot;Licensed&quot;&gt;Licensed&lt;/option&gt;<br/>
+                &lt;option value=&quot;&quot;&gt;None&lt;/option&gt;<br/>
+                &lt;option value=&quot;Expired&quot;&gt;Expired&lt;/option&gt;<br/>
+                &lt;option value=&quot;Suspended&quot;&gt;Suspended&lt;/option&gt;<br/>
+                &lt;option value=&quot;Revoked&quot;&gt;Revoked&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;input type=&quot;submit&quot; name=&quot;Submit&quot; value=&quot;Submit&quot;&gt;<br/>
+        &lt;/form&gt;<br/>
+        &lt;/div&gt;<br/>
+        <br/>
+        &lt;?php<br/>
+<br/>
+        if (isset($_POST[&#39;Submit&#39;])) {<br/>
+    // Create connection<br/>
+        $conn = new mysqli($servername, $username, $password, $dbname);<br/>
+// Check connection<br/>
+        if ($conn&ndash;&gt;connect_error) {<br/>
+            die(&quot;Connection failed: &quot; . $conn&ndash;&gt;connect_error);<br/>
+        }<br/>
+        <br/>
+        $first = $_POST[&#39;first&#39;];<br/>
+        $last = $_POST[&#39;last&#39;];<br/>
+        $dob = $_POST[&#39;dob&#39;];<br/>
+        $address = $_POST[&#39;address&#39;];<br/>
+        $gender = $_POST[&#39;gender&#39;];<br/>
+        $lic = $_POST[&#39;lic&#39;];<br/>
+        <br/>
+        $sql = &quot;INSERT INTO characters (ownerID, first, last, dob, address, gender, lic)<br/>
+                VALUES (&#39;$session_id&#39;, &#39;$first&#39;, &#39;$last&#39;, &#39;$dob&#39;, &#39;$address&#39;, &#39;$gender&#39;, &#39;$lic&#39;)&quot;;<br/>
+<br/>
+        if ($conn&ndash;&gt;query($sql) === TRUE) {<br/>
+            //echo &quot;New record created successfully&quot;;<br/>
+        } else {<br/>
+            //echo &quot;Error: &quot; . $sql . &quot;&lt;br&gt;&quot; . $conn&ndash;&gt;error;<br/>
+        }<br/>
+<br/>
+        $conn&ndash;&gt;close();<br/>
+        }<br/>
+        ?&gt;<br/>
+<br/>
+        <br/>
+  &lt;/div&gt;<br/>
+        &lt;/center&gt;<br/>
+    &lt;/div&gt;<br/>
+        <br/>
+&lt;script&gt;<br/>
+    // Get the modal<br/>
+var add = document.getElementById(&#39;addModal&#39;);<br/>
+<br/>
+// Get the button that opens the modal<br/>
+var btn = document.getElementById(&quot;myBtn&quot;);<br/>
+<br/>
+// Get the &lt;span&gt; element that closes the modal<br/>
+var span = document.getElementsByClassName(&quot;close&quot;)[0];<br/>
+<br/>
+//get url<br/>
+<br/>
+var url_string = window.location.href;<br/>
+var url = new URL(url_string);<br/>
+var linkUrl = url.searchParams.get(&quot;link&quot;);<br/>
+var id = url.searchParams.get(&quot;id&quot;);<br/>
+<br/>
+//When #link open modal<br/>
+if (linkUrl === &quot;1&quot;) {<br/>
+add.style.display = &#39;block&#39;;<br/>
+}<br/>
+<br/>
+// When the user clicks on &lt;span&gt; (x), close the modal<br/>
+span.onclick = function() {<br/>
+  add.style.display = &quot;none&quot;;<br/>
+}<br/>
+<br/>
+// When the user clicks anywhere outside of the modal, close it<br/>
+window.onclick = function(event) {<br/>
+  if (event.target == add) {<br/>
+    add.style.display = &quot;none&quot;;<br/>
+  }<br/>
+}<br/>
+    &lt;/script&gt;<br/>
+    &lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

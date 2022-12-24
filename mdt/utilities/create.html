@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+if(!empty($_POST)) {<br/>
+    $name = htmlspecialchars($_POST[&#39;name&#39;]);<br/>
+    $email = htmlspecialchars($_POST[&#39;email&#39;]);<br/>
+    $password = htmlspecialchars($_POST[&#39;pass&#39;]);<br/>
+    $password2 = htmlspecialchars($_POST[&#39;pass2&#39;]);<br/>
+    $code = htmlspecialchars($_POST[&#39;code&#39;]);<br/>
+    <br/>
+    if ($password != $password2) {<br/>
+        session_start();<br/>
+        $_SESSION[&#39;loginError&#39;] = &quot;Passwords Don&#39;t Match $password &ndash; $password2&quot;;<br/>
+        header(&quot;Location:$defaultURL/create.php&quot;);<br/>
+        exit();<br/>
+    }<br/>
+    <br/>
+    $password = password_hash($password, PASSWORD_DEFAULT);<br/>
+    <br/>
+    if ($enableCode == true) {<br/>
+        $query = &quot;SELECT * FROM mdt_users WHERE code=&#39;$code&#39;&quot;;<br/>
+<br/>
+        $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+        if (!$result&ndash;&gt;num_rows &gt; 0) {<br/>
+            session_start();<br/>
+            $_SESSION[&#39;loginError&#39;] =  &quot;Account Code Does Not Exist&quot;;<br/>
+            header(&quot;Location:$defaultURL/create.php&quot;);<br/>
+            exit();<br/>
+        } else {    <br/>
+            $query = &quot;UPDATE mdt_users SET name=&#39;$name&#39;, email=&#39;$email&#39;, password=&#39;$password&#39;, code=&#39;(NULL)&#39; WHERE code=&#39;$code&#39;&quot;;<br/>
+<br/>
+            mysqli_query($conn, $query);<br/>
+            header(&quot;Location:$defaultURL/index.php&quot;);<br/>
+            exit();<br/>
+        }<br/>
+    }<br/>
+<br/>
+$query = &quot;INSERT INTO mdt_users (name, email, password, code) VALUES (&#39;$name&#39;, &#39;$email&#39;, &#39;$password&#39;, &#39;(NULL)&#39;)&quot;;<br/>
+<br/>
+mysqli_query($conn, $query);<br/>
+header(&quot;Location:$defaultURL/index.php&quot;);<br/>
+exit();<br/>
+}</body></html>

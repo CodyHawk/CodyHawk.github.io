@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+include &quot;../include/topCiv.php&quot;;<br/>
+<br/>
+if (empty($_SESSION[&#39;user_loggedIn&#39;])) {<br/>
+    header(&quot;Location:$defaultURL&quot;);<br/>
+    die(&quot;You must login first&quot;);<br/>
+}<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;body bgcolor=&quot;#fff&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;title&gt;Civilian&lt;/title&gt;<br/>
+<br/>
+&lt;div id=&quot;characterSelection&quot;&gt;<br/>
+    &lt;img id=&quot;characterPicture&quot; src=&quot;&lt;?php echo $defaultURL; ?&gt;/img/profile.png&quot;&gt;<br/>
+    <br/>
+    &lt;form method=&quot;post&quot; id=&#39;civForm&#39; action=&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;&gt;<br/>
+        <br/>
+        &lt;div id=&quot;row1&quot;&gt;<br/>
+        &lt;select id=&quot;nameSelect&quot; name=&quot;nameSelect&quot;&gt;<br/>
+            &lt;option value=&quot;add&quot;&gt;Add Character&lt;/option&gt;<br/>
+            &lt;?php<br/>
+            $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+            $query = &quot;SELECT id, first, last FROM mdt_characters WHERE ownerID=&#39;$user_id&#39;&quot;;<br/>
+            $result = $conn&ndash;&gt;query($query);<br/>
+            <br/>
+            if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                // output data of each row<br/>
+                while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                    $first = $row[&#39;first&#39;];<br/>
+                    $last = $row[&#39;last&#39;];<br/>
+                    $id = $row[&#39;id&#39;];<br/>
+                    echo &quot;&lt;option value=&#39;$id&#39;&gt;$first $last&lt;/option&gt;&quot;;<br/>
+                }<br/>
+            }<br/>
+            ?&gt;<br/>
+        &lt;/select&gt;<br/>
+        <br/>
+        &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;text&quot; id=&quot;first&quot; name=&quot;first&quot;  placeholder=&quot;First Name&quot;&gt;<br/>
+        <br/>
+        &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;text&quot; id=&quot;last&quot; name=&quot;last&quot; placeholder=&quot;Last Name&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;row2&quot;&gt;<br/>
+            <br/>
+            &lt;input type=&quot;date&quot; id=&quot;dob&quot; name=&quot;dob&quot;&gt;<br/>
+            <br/>
+            &lt;select id=&quot;gender&quot; name=&quot;gender&quot; style=&quot;margin&ndash;top:25px;&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Gender&lt;/option&gt;<br/>
+                &lt;option&gt;Male&lt;/option&gt;<br/>
+                &lt;option&gt;Female&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;text&quot; id=&quot;address&quot; name=&quot;address&quot; placeholder=&quot;Address&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+        <br/>
+        &lt;div id=&quot;row3&quot;&gt;<br/>
+            &lt;select id=&quot;lic&quot; name=&quot;lic&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Driver License&lt;/option&gt;<br/>
+                &lt;option&gt;None&lt;/option&gt;<br/>
+                &lt;option&gt;Valid&lt;/option&gt;<br/>
+                &lt;option&gt;Expired&lt;/option&gt;<br/>
+                &lt;option&gt;Suspended&lt;/option&gt;<br/>
+                &lt;option&gt;Revoked&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;select id=&quot;weapon&quot; name=&quot;weapon&quot; style=&quot;margin&ndash;top:25px;&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Weapon License&lt;/option&gt;<br/>
+                &lt;option&gt;None&lt;/option&gt;<br/>
+                &lt;option&gt;Valid&lt;/option&gt;<br/>
+                &lt;option&gt;Revoked&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;submit&quot; id=&quot;submit&quot; name=&quot;submitCiv&quot;&gt;<br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; value=&#39;Delete&#39; type=&quot;submit&quot; id=&quot;delete&quot; name=&quot;deleteCiv&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/form&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+<br/>
+&lt;div id=&quot;vehicleSelection&quot;&gt;<br/>
+    &lt;img id=&quot;vehiclePicture&quot; src=&quot;&lt;?php echo $defaultURL; ?&gt;/img/vehicle.png&quot;&gt;<br/>
+    <br/>
+    &lt;form method=&quot;post&quot; action=&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;&gt;<br/>
+        <br/>
+        &lt;div id=&quot;row1&quot;&gt;<br/>
+        &lt;select id=&quot;vehicleSelect&quot; name=&quot;vehicleSelect&quot;&gt;<br/>
+            &lt;option value=&quot;add&quot;&gt;Add vehicle&lt;/option&gt;<br/>
+            &lt;?php<br/>
+            $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+            $query = &quot;SELECT model, id FROM mdt_vehicles WHERE ownerID=&#39;$user_id&#39; &quot;;<br/>
+            $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+            if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                // output data of each row<br/>
+                while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                    $model = $row[&#39;model&#39;];<br/>
+                    $id = $row[&#39;id&#39;];<br/>
+                    echo &quot;&lt;option value=&#39;$id&#39;&gt;$model&lt;/option&gt;&quot;;<br/>
+                }<br/>
+            }<br/>
+            ?&gt;<br/>
+        &lt;/select&gt;<br/>
+            <br/>
+            &lt;select style=&quot;margin&ndash;top:25px;&quot; id=&quot;owner&quot; name=&quot;owner&quot;&gt;<br/>
+                &lt;?php<br/>
+                $user_id = $_SESSION[&#39;user_id&#39;];<br/>
+                $query = &quot;SELECT id, first, last FROM mdt_characters WHERE ownerID=&#39;$user_id&#39;&quot;;<br/>
+                $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+                if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+                    // output data of each row<br/>
+                    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                        $first = $row[&#39;first&#39;];<br/>
+                        $last = $row[&#39;last&#39;];<br/>
+                        $id = $row[&#39;id&#39;];<br/>
+                        echo &quot;&lt;option value=&#39;$id&#39;&gt;$first $last&lt;/option&gt;&quot;;<br/>
+                    }<br/>
+                }<br/>
+                ?&gt;<br/>
+            &lt;/select&gt;<br/>
+        <br/>
+        &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;text&quot; id=&quot;model&quot; name=&quot;model&quot;  placeholder=&quot;Vehicle Name&quot;&gt;<br/>
+        <br/>
+        &lt;/div&gt;<br/>
+        &lt;div id=&quot;row2&quot;&gt;<br/>
+            <br/>
+            &lt;input type=&quot;text&quot; id=&quot;plate&quot; name=&quot;plate&quot; placeholder=&quot;Vehicle Plate&quot;&gt;<br/>
+            <br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;text&quot; id=&quot;description&quot; name=&quot;description&quot; placeholder=&quot;Vehicle Description&quot;&gt;<br/>
+            <br/>
+            &lt;select id=&quot;reg&quot; name=&quot;reg&quot; style=&quot;margin&ndash;top:25px;&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Registration&lt;/option&gt;<br/>
+                &lt;option&gt;Valid&lt;/option&gt;<br/>
+                &lt;option&gt;Expired&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+        &lt;/div&gt;<br/>
+        <br/>
+        &lt;div id=&quot;row3&quot;&gt;<br/>
+            <br/>
+            &lt;select id=&quot;insurance&quot; name=&quot;insurance&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Insurance&lt;/option&gt;<br/>
+                &lt;option&gt;None&lt;/option&gt;<br/>
+                &lt;option&gt;Valid&lt;/option&gt;<br/>
+                &lt;option&gt;Expired&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;select id=&quot;flags&quot; name=&quot;flags&quot; style=&quot;margin&ndash;top:25px;&quot;&gt;<br/>
+                &lt;option disabled selected&gt;Flags&lt;/option&gt;<br/>
+                &lt;option&gt;None&lt;/option&gt;<br/>
+                &lt;option&gt;Stolen&lt;/option&gt;<br/>
+            &lt;/select&gt;<br/>
+            <br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; type=&quot;submit&quot; id=&quot;submit&quot; name=&quot;submitVeh&quot;&gt;<br/>
+            &lt;input style=&quot;margin&ndash;top:25px;&quot; value=&#39;Delete&#39; type=&quot;submit&quot; id=&quot;delete&quot; name=&quot;deleteVeh&quot;&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/form&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    $(&quot;#vehicleSelect&quot;).val(&lt;?php  if(isset($_SESSION[&#39;currentVeh&#39;])) {echo $_SESSION[&#39;currentVeh&#39;];}else{echo &quot;&#39;add&#39;&quot;;}?&gt;);<br/>
+    <br/>
+    getVeh();<br/>
+    <br/>
+    $(&#39;#vehicleSelect&#39;).on(&#39;change&#39;, function() {getVeh();});<br/>
+    <br/>
+    function getVeh() {<br/>
+    var selected = document.getElementById(&quot;vehicleSelect&quot;).options[vehicleSelect.selectedIndex].value;<br/>
+    if (selected !== &quot;add&quot;) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getVeh&#39;,<br/>
+      vehID: selected<br/>
+    },<br/>
+    function(response){<br/>
+        console.log(response);<br/>
+    response = JSON.parse(response);<br/>
+      document.getElementById(&quot;model&quot;).value = response[0];<br/>
+      document.getElementById(&quot;plate&quot;).value = response[1];<br/>
+      document.getElementById(&quot;description&quot;).value = response[2];<br/>
+      $(&quot;#reg&quot;).val(response[3]);<br/>
+      $(&quot;#insurance&quot;).val(response[4]);<br/>
+      $(&quot;#flags&quot;).val(response[5]);<br/>
+      $(&quot;#owner&quot;).val(response[6]);<br/>
+      console.log(response[6]);<br/>
+    });<br/>
+    }<br/>
+    };<br/>
+&lt;/script&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    $(&quot;#nameSelect&quot;).val(&lt;?php  if(isset($_SESSION[&#39;currentCiv&#39;])) {echo $_SESSION[&#39;currentCiv&#39;];}else{echo &quot;&#39;add&#39;&quot;;}?&gt;);<br/>
+    <br/>
+    getCiv();<br/>
+    <br/>
+    $(&#39;#nameSelect&#39;).on(&#39;change&#39;, function() {getCiv();});<br/>
+    <br/>
+    function getCiv() {<br/>
+    var selected = document.getElementById(&quot;nameSelect&quot;).options[document.getElementById(&quot;nameSelect&quot;).selectedIndex].value;<br/>
+     <br/>
+    if (selected !== &quot;add&quot;) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getCiv&#39;,<br/>
+      civID: selected<br/>
+    },<br/>
+    function(response){<br/>
+      response = JSON.parse(response);<br/>
+      document.getElementById(&quot;first&quot;).value = response[0];<br/>
+      document.getElementById(&quot;last&quot;).value = response[1];<br/>
+      document.getElementById(&quot;dob&quot;).value = response[2];<br/>
+      $(&quot;#gender&quot;).val(response[3]);<br/>
+      document.getElementById(&quot;address&quot;).value = response[4];<br/>
+      $(&quot;#lic&quot;).val(response[5]);<br/>
+      $(&quot;#weapon&quot;).val(response[6]);<br/>
+    });<br/>
+    }<br/>
+    };<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+    /*<br/>
+$( &quot;input&quot; ).keydown(function() {<br/>
+  this.value=this.value.replace(/,/g,&#39;&#39;);<br/>
+});<br/>
+$( &quot;input&quot; ).keyup(function() {<br/>
+  this.value=this.value.replace(/,/g,&#39;&#39;);<br/>
+});<br/>
+*/<br/>
+&lt;/script&gt;</body></html>

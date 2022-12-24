@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+$con = mysqli_connect(&quot;localhost&quot;,&quot;root&quot;,&quot;CustomCad12&quot;,&quot;mdt&quot;);<br/>
+<br/>
+$servername = &quot;localhost&quot;;<br/>
+$username = &quot;root&quot;;<br/>
+$password = &quot;CustomCad12&quot;;<br/>
+$dbname = &quot;mdt&quot;;<br/>
+<br/>
+// Check connection<br/>
+if (mysqli_connect_errno())<br/>
+  {<br/>
+  echo &quot;Failed to connect to MySQL: &quot; . mysqli_connect_error();<br/>
+  }<br/>
+  <br/>
+$con = MySQLi_connect(<br/>
+ <br/>
+   &quot;localhost&quot;, //Server host name.<br/>
+ <br/>
+   &quot;root&quot;, //Database username.<br/>
+ <br/>
+   &quot;CustomCad12&quot;, //Database password.<br/>
+ <br/>
+   &quot;mdt&quot; //Database name or anything you would like to call it.<br/>
+ <br/>
+);<br/>
+?&gt;</body></html>

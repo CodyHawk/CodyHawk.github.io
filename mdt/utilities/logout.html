@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+session_start();<br/>
+include(&#39;../settings.php&#39;);<br/>
+$user_id = $_SESSION[&#39;user_id&#39;];<br/>
+mysqli_query($conn, &quot;DELETE FROM mdt_active_users WHERE user_id=&#39;$user_id&#39;&quot;);<br/>
+session_unset();<br/>
+session_destroy();<br/>
+header(&#39;location:../index.php&#39;);<br/>
+?&gt;</body></html>

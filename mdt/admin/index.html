@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php<br/>
+include(&#39;../settings.php&#39;);<br/>
+include &quot;../include/topCiv.php&quot;;<br/>
+<br/>
+if (empty($_SESSION[&#39;user_loggedIn&#39;])) {<br/>
+    header(&quot;Location:$defaultURL&quot;);<br/>
+    die(&quot;You must login first&quot;);<br/>
+}<br/>
+<br/>
+if ($_SESSION[&#39;user_admin&#39;] == 0) {<br/>
+    header(&quot;Location:https://www.youtube.com/watch?v=dQw4w9WgXcQ&quot;);<br/>
+    exit();<br/>
+}<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+&lt;body bgcolor=&quot;#fff&quot;&gt;<br/>
+&lt;title&gt;Admin Panel&lt;/title&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;&lt;?php echo $defaultURL;?&gt;/modal.css&quot;&gt;<br/>
+&lt;link href=&quot;https://fonts.googleapis.com/css?family=Roboto:400,500&quot; rel=&quot;stylesheet&quot;&gt;<br/>
+<br/>
+&lt;div id=&quot;sidebar&quot;&gt;<br/>
+    &lt;button onclick=&quot;openScreen(&#39;#server&#39;)&quot;&gt;Server Controls&lt;/button&gt;<br/>
+    &lt;button style=&quot;margin&ndash;top: 75px;&quot; onclick=&quot;openScreen(&#39;#user&#39;)&quot;&gt;User Controls&lt;/button&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;server&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;div class=&quot;serverStatus&quot;&gt;<br/>
+        &lt;img id=&quot;loading&quot; src=&quot;&lt;?php echo $defaultURL; ?&gt;/img/loading.gif&quot;&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;viewServer&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1 id=&quot;serverHeader&quot;&gt;Server &ndash; &lt;/h1&gt;<br/>
+    &lt;button id=&quot;refresh&quot; class=&quot;smallButton&quot; style=&quot;position:relative;&quot; onclick=&quot;&quot;&gt;Refresh&lt;/button&gt;<br/>
+    &lt;table id=&quot;playerTable&quot;&gt;&lt;/table&gt;<br/>
+    &lt;div id=&quot;options&quot;&gt;<br/>
+        &lt;h2 style=&quot;margin&ndash;left: 25px;&quot; id=&quot;uptime&quot;&gt;Uptime: 00h 10m&lt;/h2&gt;<br/>
+        &lt;h2 style=&quot;margin&ndash;left: 25px;&quot; id=&quot;players&quot;&gt;Players: 22/32&lt;/h2&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div id=&quot;options2&quot;&gt;<br/>
+        &lt;h2&gt;Announce to Server&lt;/h2&gt;<br/>
+        &lt;textarea id=&quot;announcement&quot;&gt;&lt;/textarea&gt;<br/>
+        &lt;button class=&quot;smallButton&quot; style=&quot;margin&ndash;left:0;&quot; id=&quot;aSend&quot; onclick=&quot;announcementSend()&quot;&gt;Send&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div id=&quot;options3&quot;&gt;<br/>
+        &lt;h2&gt;Restart Server&lt;/h2&gt;<br/>
+        &lt;button class=&quot;smallButton&quot; style=&quot;margin&ndash;left:0;&quot; onclick=&quot;restartConfirm()&quot;&gt;Restart&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;user&quot; class=&quot;screen&quot;&gt;<br/>
+    &lt;h1 style=&quot;margin&ndash;left: 25px;&quot;&gt;MDT User Controls&lt;/h1&gt;<br/>
+    &lt;table id=&quot;userTable&quot;&gt;&lt;/table&gt;<br/>
+    &lt;div id=&quot;Code&quot;&gt;<br/>
+    &lt;h2 style=&quot;margin&ndash;left: 25px;&quot;&gt;Generate and Remove Login Code&lt;/h2&gt;<br/>
+    &lt;button onclick=&quot;genLogin()&quot; class=&quot;mediumButton&quot;&gt;Generate&lt;/button&gt;<br/>
+    &lt;button onclick=&quot;removeLogin()&quot; class=&quot;mediumButton&quot;&gt;Remove All&lt;/button&gt;<br/>
+    &lt;br&gt;<br/>
+    &lt;textarea id=&quot;loginCode&quot; disabled&gt;&lt;/textarea&gt;<br/>
+    &lt;/div&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;banModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Please enter a ban reason&lt;/h1&gt;<br/>
+            &lt;textarea id=&quot;banReason&quot;&gt;&lt;/textarea&gt;<br/>
+            &lt;br&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Ban&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;kickModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Please enter a kick reason&lt;/h1&gt;<br/>
+            &lt;textarea id=&quot;kickReason&quot;&gt;&lt;/textarea&gt;<br/>
+            &lt;br&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Kick&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;restartModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Are you sure you want to restart server &lt;/h1&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Restart&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;div id=&quot;suspendModal&quot; class=&quot;modal&quot;&gt;<br/>
+    &lt;center&gt;<br/>
+        &lt;div class=&quot;modal&ndash;content&quot;&gt;<br/>
+            &lt;h1&gt;Are you sure you want to suspend this user?&lt;/h1&gt;<br/>
+            &lt;button id=&quot;yes&quot;&gt;Yes&lt;/button&gt;<br/>
+            &lt;button onclick=&quot;closeModal()&quot;&gt;Cancel&lt;/button&gt;<br/>
+        &lt;/div&gt;<br/>
+    &lt;/center&gt;<br/>
+&lt;/div&gt;<br/>
+<br/>
+&lt;script&gt;<br/>
+    function openScreen(open) {<br/>
+        $(&quot;.screen&quot;).hide();<br/>
+        $(open).show();<br/>
+    }<br/>
+    openScreen(&#39;#server&#39;)<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+loadServers();<br/>
+function loadServers() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getServers&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#server .serverStatus&quot;).html(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+function selectServer(id) {<br/>
+openScreen(&#39;#viewServer&#39;);<br/>
+$(&quot;#viewServer #serverHeader&quot;).html(&quot;Server &quot; + id + &quot; Control Pannel&quot;);<br/>
+$(&quot;#viewServer #refresh&quot;).attr(&#39;onclick&#39;,&quot;selectServer(&quot; + id + &quot;)&quot;);<br/>
+$(&quot;#viewServer #aSend&quot;).attr(&#39;onclick&#39;,&quot;announcementSend(&quot; + id + &quot;)&quot;);<br/>
+$(&quot;#restartModal h1&quot;).text(&quot;Are you sure you want to restart server &quot; + id + &quot;?&quot;);<br/>
+$(&quot;#restartModal #yes&quot;).attr(&#39;onclick&#39;,&quot;rcon(&quot; + id + &quot;,&#39;restart_server&#39;); closeModal();&quot;);<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getServerPlayerTable&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#playerTable&quot;).html(response);<br/>
+    });<br/>
+<br/>
+$.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getServerInfo&#39;,<br/>
+      id: id<br/>
+    },<br/>
+    function(response){<br/>
+        response = JSON.parse(response);<br/>
+        $(&quot;#uptime&quot;).text(&quot;Uptime: &quot; + response[0]);<br/>
+        $(&quot;#players&quot;).text(&quot;Players: &quot; + response[1]);<br/>
+    });<br/>
+}<br/>
+<br/>
+function ban(server,id) {<br/>
+    var reason = $(&quot;#banReason&quot;).val();<br/>
+    rcon(server, &quot;ban &quot; + id + &quot; &quot; + reason);<br/>
+}<br/>
+<br/>
+function kick(server,id) {<br/>
+    var reason = $(&quot;#kickReason&quot;).val();<br/>
+    rcon(server, &quot;kick &quot; + id + &quot; &quot; + reason);<br/>
+}<br/>
+<br/>
+function rcon(server, command) {<br/>
+    closeModal();<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;rcon&#39;,<br/>
+      server: server,<br/>
+      command: command<br/>
+    },<br/>
+    function(response){<br/>
+            selectServer(server);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(response)<br/>
+    });<br/>
+}<br/>
+<br/>
+function announcementSend(server) {<br/>
+    var announcement = $(&quot;#announcement&quot;).val();<br/>
+    rcon(server, &quot;announce &quot; + announcement)<br/>
+    $(&quot;#announcement&quot;).val(&quot;&quot;);<br/>
+}<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function genLogin() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;genLogin&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#loginCode&quot;).val(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+function removeLogin() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;removeLogin&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#loginCode&quot;).val(response);<br/>
+    });<br/>
+}<br/>
+<br/>
+loadUserTable();<br/>
+function loadUserTable() {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;getUsersTable&#39;<br/>
+    },<br/>
+    function(response){<br/>
+        $(&quot;#userTable&quot;).html(response);<br/>
+        console.log(response);<br/>
+    });<br/>
+    }<br/>
+    <br/>
+function userSuspend(id, suspend) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;userSuspend&#39;,<br/>
+      id: id,<br/>
+      suspend: suspend<br/>
+    },<br/>
+    function(response){<br/>
+        closeModal();<br/>
+        loadUserTable();<br/>
+    });<br/>
+}<br/>
+&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+function banConfirm(server, id) {<br/>
+    document.getElementById(&#39;banModal&#39;).style.display = &#39;block&#39;;<br/>
+    $(&quot;#banModal button#yes&quot;).attr(&#39;onclick&#39;,&quot;ban(&quot; + server + &quot;,&quot; + id + &quot;)&quot;);<br/>
+}<br/>
+<br/>
+function kickConfirm(server, id) {<br/>
+    document.getElementById(&#39;kickModal&#39;).style.display = &#39;block&#39;;<br/>
+    $(&quot;#kickModal button#yes&quot;).attr(&#39;onclick&#39;,&quot;kick(&quot; + server + &quot;,&quot; + id + &quot;)&quot;);<br/>
+}<br/>
+<br/>
+function restartConfirm(server, id) {<br/>
+    document.getElementById(&#39;restartModal&#39;).style.display = &#39;block&#39;;<br/>
+    $(&quot;#kickModal button#yes&quot;).attr(&#39;onclick&#39;,&quot;kick(&quot; + server + &quot;,&quot; + id + &quot;)&quot;);<br/>
+}<br/>
+<br/>
+function userSuspendConfirm(id) {<br/>
+    document.getElementById(&#39;suspendModal&#39;).style.display = &#39;block&#39;;<br/>
+    $(&quot;#suspendModal button#yes&quot;).attr(&#39;onclick&#39;,&quot;userSuspend(&quot; + id + &quot;,1)&quot;);<br/>
+}<br/>
+<br/>
+function closeModal() {<br/>
+$(&quot;.modal&quot;).hide();<br/>
+}<br/>
+<br/>
+window.onclick = function(event) {<br/>
+if ($(event.target).hasClass(&quot;modal&quot;)) {<br/>
+$(&quot;.modal&quot;).hide();<br/>
+}};<br/>
+&lt;/script&gt;<br/>
+&lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>

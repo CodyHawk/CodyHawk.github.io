@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+&lt;?php include(&#39;settings.php&#39;);<br/>
+session_start();<br/>
+if (empty($_SESSION[&#39;user_loggedIn&#39;]))<br/>
+{<br/>
+&nbsp;&nbsp;&nbsp;header(&quot;Location:$defaultURL&quot;);<br/>
+    die(&quot;You must login first&quot;);<br/>
+}<br/>
+<br/>
+$user_id = $_SESSION[&#39;user_id&#39;];<br/>
+unset($_SESSION[&#39;user_identifier&#39;]);<br/>
+mysqli_query($conn, &quot;DELETE FROM mdt_active_users WHERE user_id=&#39;$user_id&#39;&quot;);<br/>
+<br/>
+$query = &quot;SELECT steam FROM mdt_users WHERE user_id=&#39;$user_id&#39;&quot;;<br/>
+$result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+    // output data of each row<br/>
+    while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+        mysqli_query($conn, &quot;DELETE FROM mdt_players WHERE steam=&#39;&quot; . $row[&#39;steam&#39;] . &quot;&#39;&quot;);<br/>
+    }<br/>
+}<br/>
+?&gt;<br/>
+&lt;html&gt;<br/>
+    &lt;head&gt;<br/>
+        &lt;meta charset=&quot;UTF&ndash;8&quot;&gt;<br/>
+        &lt;title&gt;Dashboard&lt;/title&gt;<br/>
+        &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;&gt;<br/>
+        &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
+        &lt;script src=&quot;&lt;?php echo $defaultURL;?&gt;/utilities/console.js&quot;&gt;&lt;/script&gt;<br/>
+    &lt;/head&gt;<br/>
+    &lt;body&gt;<br/>
+    &lt;center&gt;&lt;h1&gt;Please select a Department&lt;/h1&gt;&lt;/center&gt;<br/>
+    &lt;div id=&quot;departmentIcons&quot;&gt;<br/>
+        &lt;a href=&quot;javascript:showDepartments();&quot;&gt;&lt;img src=&quot;img/leoIcon.png&quot; alt=&quot;LEO&quot;&gt;&lt;/a&gt;<br/>
+        &lt;a href=&quot;dispatch&quot;&gt;&lt;img src=&quot;img/dispatchIcon.png&quot; alt=&quot;Dispatch&quot;&gt;&lt;/a&gt;<br/>
+        &lt;a href=&quot;civ&quot;&gt;&lt;img src=&quot;img/civIcon.png&quot; alt=&quot;Civilian&quot;&gt;&lt;/a&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div id=&quot;leodepartmentIcons&quot;&gt;<br/>
+        &lt;?php <br/>
+        $query = &quot;SELECT id, name, icon FROM mdt_departments&quot;;<br/>
+        $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+        if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+            // output data of each row<br/>
+            while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+                $icon = $row[&#39;icon&#39;];<br/>
+                $id = $row[&#39;id&#39;];<br/>
+                echo &quot;&lt;a href=&#39;javascript:showDivisons($id);&#39;&gt;&lt;img src=&#39;img/$icon.png&#39;&gt;&lt;/a&gt;&quot;;<br/>
+            }<br/>
+        }<br/>
+            ?&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div id=&#39;leoDivison&#39;&gt;<br/>
+            &lt;?php<br/>
+    $query = &quot;SELECT id, departmentID, name, icon FROM mdt_divisions&quot;;<br/>
+    $result = $conn&ndash;&gt;query($query);<br/>
+<br/>
+    if ($result&ndash;&gt;num_rows &gt; 0) {<br/>
+        // output data of each row<br/>
+        while ($row = $result&ndash;&gt;fetch_assoc()) {<br/>
+            $icon = $row[&#39;icon&#39;];<br/>
+            $departmentID = $row[&#39;departmentID&#39;];<br/>
+            $divisonID = $row[&#39;id&#39;];<br/>
+            $name = $row[&#39;name&#39;];<br/>
+            echo &quot;&lt;a href=&#39;javascript:setDepartment($departmentID, $divisonID);&#39;&gt;&lt;div style=&#39;display:none; padding: 25px;&#39; id=&#39;leoDivisonIcons&#39; class=&#39;$departmentID&#39;&gt;&lt;img id=&#39;leoDivisonIcons&#39; src=&#39;img/$icon.png&#39;&gt;&lt;div class=&#39;name&#39;&gt;$name&lt;/div&gt;&lt;/div&gt;&lt;/a&gt;&quot;;<br/>
+        }<br/>
+    }<br/>
+    ?&gt;<br/>
+    &lt;/div&gt;<br/>
+    &lt;div id=&#39;reset&#39;&gt;<br/>
+        &lt;button onclick=&quot;location.reload();&quot;&gt;Reset&lt;/button&gt;<br/>
+    &lt;/div&gt;<br/>
+    <br/>
+    &lt;script&gt;<br/>
+function showDepartments() {<br/>
+  $(&#39;#departmentIcons&#39;).fadeOut(&#39;slow&#39;); <br/>
+  $(&#39;#leodepartmentIcons img&#39;).fadeIn(&#39;.2&#39;);<br/>
+  $(&#39;#reset&#39;).fadeIn(&#39;slow&#39;);<br/>
+};<br/>
+<br/>
+function showDivisons(id) {<br/>
+  $(&#39;#leodepartmentIcons img&#39;).fadeOut(&#39;slow&#39;);<br/>
+  $(&#39;.&#39; + id).each(function(i) {<br/>
+  $(this).delay(i*350).fadeIn(&#39;slow&#39;)<br/>
+  });<br/>
+};<br/>
+<br/>
+function setDepartment(department, divison) {<br/>
+    $.post(&quot;&lt;?php echo $defaultURL; ?&gt;/utilities/api.php&quot;,<br/>
+    {<br/>
+      function: &#39;setDepartment&#39;,<br/>
+      departmentID: department,<br/>
+      divisonID: divison<br/>
+    },<br/>
+    function(response){<br/>
+      location.assign(&quot;leo&quot;);<br/>
+    });<br/>
+        }<br/>
+        &lt;/script&gt;<br/>
+    &lt;/body&gt;<br/>
+&lt;/html&gt;</body></html>
